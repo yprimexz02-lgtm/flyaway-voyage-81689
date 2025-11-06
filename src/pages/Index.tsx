@@ -91,8 +91,8 @@ const Index = () => {
           style={{ backgroundImage: `url(${heroImage})` }}
         />
         
-        {/* Dark overlay */}
-        <div className="absolute inset-0 bg-black/50" />
+        {/* Dark overlay with blue tint */}
+        <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-primary-dark/50 to-background/90" />
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center text-white animate-fade-in">
@@ -106,7 +106,7 @@ const Index = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-8">
-              <Button size="lg" className="bg-white text-foreground hover:bg-white/90 text-lg px-8 py-6 rounded-full">
+              <Button size="lg" className="bg-primary hover:bg-primary-light text-lg px-8 py-6 rounded-full glow">
                 Reserve já a sua visita guiada!
               </Button>
             </div>
@@ -131,7 +131,7 @@ const Index = () => {
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url(${bgForest})` }}
         />
-        <div className="absolute inset-0 backdrop-blur-3xl bg-background/70" />
+        <div className="absolute inset-0 backdrop-blur-3xl bg-background/90" />
         
         <div className="container mx-auto px-4 relative z-10">
           <div className={`flex flex-col items-center text-center space-y-8 transition-all duration-1000 ${
@@ -154,9 +154,9 @@ const Index = () => {
                 "Pacotes personalizados para cada viajante",
                 "Suporte incomparável antes e durante as viagens"
               ].map((item, index) => (
-                <div key={index} className="flex flex-col items-center gap-3 p-6 rounded-2xl glass-card group">
+                <div key={index} className="flex flex-col items-center gap-3 p-6 rounded-2xl glass-card group hover-lift border border-primary/30">
                   <div className="flex-shrink-0">
-                    <svg className="w-6 h-6 text-destructive group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-6 h-6 text-accent group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
                     </svg>
                   </div>
@@ -171,9 +171,10 @@ const Index = () => {
       {/* Destinos Populares */}
       <section 
         ref={destinationsSection.elementRef}
-        className="py-24 bg-muted/30 relative overflow-hidden"
+        className="py-24 relative overflow-hidden"
       >
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
         
         <div className="container mx-auto px-4 relative z-10">
           <div 
@@ -210,17 +211,17 @@ const Index = () => {
                   alt={dest.name}
                   className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-1000"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-primary/95 via-primary/50 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-primary-dark/60 to-transparent opacity-90 group-hover:opacity-95 transition-opacity" />
                 
                 {/* Glass card effect on hover */}
-                <div className="absolute inset-x-4 bottom-4 p-6 rounded-2xl glass-card opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
+                <div className="absolute inset-x-4 bottom-4 p-6 rounded-2xl glass-card opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0 border border-primary/40 glow">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <MapPin className="w-5 h-5 text-primary" />
+                      <MapPin className="w-5 h-5 text-accent" />
                       <h3 className="text-2xl font-bold text-foreground">{dest.name}</h3>
                     </div>
                   </div>
-                  <p className="text-lg text-foreground/80 mb-2">A partir de</p>
+                  <p className="text-lg text-muted-foreground mb-2">A partir de</p>
                   <p className="text-3xl font-bold text-gradient">{dest.price}</p>
                 </div>
                 
@@ -241,9 +242,9 @@ const Index = () => {
       {/* Por que viajar conosco */}
       <section 
         ref={featuresSection.elementRef}
-        className="py-24 relative overflow-hidden"
+        className="py-24 relative overflow-hidden bg-muted/20"
       >
-        <div className="absolute top-1/2 right-0 w-96 h-96 bg-secondary/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 right-0 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
         
         <div className="container mx-auto px-4 relative z-10">
           <div 
@@ -266,7 +267,7 @@ const Index = () => {
             {features.map((feature, index) => (
               <Card 
                 key={index} 
-                className={`group text-center border-2 hover:border-primary/50 hover-lift bg-gradient-to-br from-card to-muted/20 relative overflow-hidden transition-all duration-700 ${
+                className={`group text-center border-2 border-primary/20 hover:border-primary/60 hover-lift bg-card/50 backdrop-blur-sm relative overflow-hidden transition-all duration-700 ${
                   featuresSection.isVisible 
                     ? "opacity-100 translate-y-0" 
                     : "opacity-0 translate-y-10"
@@ -275,12 +276,12 @@ const Index = () => {
                   transitionDelay: featuresSection.isVisible ? `${index * 150}ms` : "0ms" 
                 }}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-accent/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <CardContent className="p-8 relative z-10">
-                  <div className="inline-flex p-5 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-3xl mb-6 transition-all duration-500 group-hover:scale-110 group-hover:rotate-6">
-                    <feature.icon className="w-10 h-10 text-primary group-hover:text-secondary transition-colors" />
+                  <div className="inline-flex p-5 bg-gradient-to-br from-primary/20 to-accent/20 rounded-3xl mb-6 transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 border border-primary/30">
+                    <feature.icon className="w-10 h-10 text-primary group-hover:text-accent transition-colors" />
                   </div>
-                  <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">{feature.title}</h3>
+                  <h3 className="text-xl font-bold mb-3 group-hover:text-gradient transition-colors">{feature.title}</h3>
                   <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
                 </CardContent>
               </Card>
