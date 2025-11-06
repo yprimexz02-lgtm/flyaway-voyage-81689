@@ -1,0 +1,139 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Modern Travel Agency Design System - Ocean & Gold */
+    --background: 210 20% 98%;
+    --foreground: 215 25% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 15%;
+
+    /* Ocean Blue - Trust & Adventure */
+    --primary: 205 85% 45%;
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 205 95% 65%;
+    --primary-dark: 205 75% 30%;
+
+    /* Warm Gold - Luxury & Sunset */
+    --secondary: 40 95% 55%;
+    --secondary-foreground: 215 25% 15%;
+
+    --muted: 210 20% 95%;
+    --muted-foreground: 215 15% 45%;
+
+    --accent: 180 75% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 20% 88%;
+    --input: 210 20% 92%;
+    --ring: 205 85% 45%;
+
+    --radius: 1rem;
+
+    /* Travel-Inspired Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(205, 85%, 45%) 0%, hsl(180, 75%, 45%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(205, 75%, 30%) 0%, hsl(205, 85%, 45%) 50%, hsl(180, 75%, 45%) 100%);
+    --gradient-card: linear-gradient(180deg, transparent 0%, hsl(205, 85%, 10%, 0.6) 100%);
+    --gradient-glass: linear-gradient(135deg, hsl(0, 0%, 100%, 0.1), hsl(0, 0%, 100%, 0.05));
+    --gradient-mesh: radial-gradient(at 0% 0%, hsl(205, 85%, 65%, 0.2) 0px, transparent 50%),
+                     radial-gradient(at 100% 0%, hsl(40, 95%, 65%, 0.2) 0px, transparent 50%),
+                     radial-gradient(at 100% 100%, hsl(180, 75%, 55%, 0.2) 0px, transparent 50%),
+                     radial-gradient(at 0% 100%, hsl(205, 85%, 65%, 0.2) 0px, transparent 50%);
+
+    /* Shadows with ocean blue tints */
+    --shadow-card: 0 4px 24px -4px hsl(205, 85%, 45%, 0.15);
+    --shadow-hover: 0 12px 48px -6px hsl(205, 85%, 45%, 0.25);
+    --shadow-premium: 0 24px 72px -12px hsl(205, 85%, 45%, 0.35);
+    --shadow-glow: 0 0 32px hsl(205, 85%, 45%, 0.4);
+
+    /* Animations */
+    --transition-base: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  .dark {
+    --background: 215 30% 10%;
+    --foreground: 0 0% 98%;
+
+    --card: 215 25% 14%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 215 25% 14%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 205 85% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 40 95% 60%;
+    --secondary-foreground: 215 25% 15%;
+
+    --muted: 215 25% 18%;
+    --muted-foreground: 215 15% 70%;
+
+    --accent: 180 75% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 215 25% 22%;
+    --input: 215 25% 22%;
+    --ring: 205 85% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "kern", "liga", "clig", "calt";
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply backdrop-blur-xl bg-white/10 border border-white/20;
+  }
+  
+  .glass-card {
+    @apply backdrop-blur-md bg-white/80 border border-white/40 shadow-card;
+  }
+  
+  .mesh-gradient {
+    background: var(--gradient-mesh), hsl(var(--background));
+  }
+  
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-primary);
+  }
+  
+  .glow {
+    box-shadow: var(--shadow-glow);
+  }
+  
+  .hover-lift {
+    @apply transition-all duration-300 hover:-translate-y-2;
+  }
+  
+  .hover-lift:hover {
+    box-shadow: var(--shadow-hover);
+  }
+}
