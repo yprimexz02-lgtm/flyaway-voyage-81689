@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import bgForest from "@/assets/bg-forest.png";
 import heroImage from "@/assets/hero-deck.jpg";
+import discoverBeach from "@/assets/discover-beach.jpg";
 import parisImage from "@/assets/dest-paris.jpg";
 import maldivesImage from "@/assets/dest-maldives.jpg";
 import nycImage from "@/assets/dest-nyc.jpg";
@@ -134,35 +135,50 @@ const Index = () => {
         <div className="absolute inset-0 backdrop-blur-3xl bg-background/90" />
         
         <div className="container mx-auto px-4 relative z-10">
-          <div className={`flex flex-col items-center text-center space-y-8 transition-all duration-1000 ${
+          <div className={`transition-all duration-1000 ${
             offersSection.isVisible 
               ? "opacity-100 translate-y-0" 
               : "opacity-0 translate-y-10"
           }`}>
-            <div className="max-w-4xl">
-              <h2 className="text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-                Descubra o <span className="text-gradient">mundo conosco.</span>
-              </h2>
-              <p className="text-foreground/80 text-lg leading-relaxed mb-8">
-                De paisagens deslumbrantes a maravilhas culturais, criamos viagens que transformam destinos em realidade. Nossa equipe garante que cada detalhe seja planejado com excelência.
-              </p>
-            </div>
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
+              {/* Imagem */}
+              <div className="order-2 lg:order-1">
+                <img 
+                  src={discoverBeach} 
+                  alt="Praia paradisíaca" 
+                  className="w-full h-[400px] object-cover rounded-3xl shadow-premium border border-primary/30"
+                />
+              </div>
 
-            <div className="grid md:grid-cols-3 gap-6 w-full max-w-5xl">
-              {[
-                "Estadias Premium e Ofertas Exclusivas",
-                "Pacotes personalizados para cada viajante",
-                "Suporte incomparável antes e durante as viagens"
-              ].map((item, index) => (
-                <div key={index} className="flex flex-col items-center gap-3 p-6 rounded-2xl glass-card group hover-lift border border-primary/30">
-                  <div className="flex-shrink-0">
-                    <svg className="w-6 h-6 text-accent group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+              {/* Texto */}
+              <div className="order-1 lg:order-2 space-y-6">
+                <h2 className="text-5xl lg:text-6xl font-bold leading-tight">
+                  Descubra o <span className="text-gradient">mundo conosco.</span>
+                </h2>
+                <p className="text-foreground/80 text-lg leading-relaxed">
+                  De paisagens deslumbrantes a maravilhas culturais, criamos viagens que transformam destinos em realidade. Nossa equipe garante que cada detalhe seja planejado com excelência.
+                </p>
+                <ul className="space-y-4">
+                  <li className="flex items-start gap-3">
+                    <svg className="w-6 h-6 text-accent flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
                     </svg>
-                  </div>
-                  <p className="text-foreground font-medium text-lg">{item}</p>
-                </div>
-              ))}
+                    <span className="text-foreground text-lg">Estadias Premium e Ofertas Exclusivas</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <svg className="w-6 h-6 text-accent flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+                    </svg>
+                    <span className="text-foreground text-lg">Pacotes personalizados para cada viajante</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <svg className="w-6 h-6 text-accent flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+                    </svg>
+                    <span className="text-foreground text-lg">Suporte incomparável antes e durante as viagens</span>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
