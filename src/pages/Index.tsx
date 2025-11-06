@@ -6,9 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Shield, Award, Clock, HeadphonesIcon, MapPin, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
-import discoverCristoRedentor from "@/assets/discover-cristo-redentor.jpg";
-import discoverTimesSquare from "@/assets/discover-times-square.jpg";
-import discoverStatueLiberty from "@/assets/discover-statue-liberty.jpg";
+import bgForest from "@/assets/bg-forest.png";
 import heroImage from "@/assets/hero-deck.jpg";
 import parisImage from "@/assets/dest-paris.jpg";
 import maldivesImage from "@/assets/dest-maldives.jpg";
@@ -126,52 +124,45 @@ const Index = () => {
       {/* Descubra o Mundo Conosco */}
       <section 
         ref={offersSection.elementRef}
-        className="py-24 relative overflow-hidden bg-background"
+        className="py-24 relative overflow-hidden"
       >
+        {/* Background com blur */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${bgForest})` }}
+        />
+        <div className="absolute inset-0 backdrop-blur-3xl bg-background/70" />
+        
         <div className="container mx-auto px-4 relative z-10">
-          <div className={`flex flex-col lg:flex-row gap-8 items-start transition-all duration-1000 ${
+          <div className={`flex flex-col items-center text-center space-y-8 transition-all duration-1000 ${
             offersSection.isVisible 
               ? "opacity-100 translate-y-0" 
               : "opacity-0 translate-y-10"
           }`}>
-            {/* Texto à esquerda */}
-            <div className="flex-1 space-y-8">
-              <div>
-                <h2 className="text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-                  Descubra o <span className="text-gradient">mundo conosco.</span>
-                </h2>
-                <p className="text-foreground/80 text-lg leading-relaxed">
-                  De paisagens deslumbrantes a maravilhas culturais, criamos viagens que transformam destinos em realidade. Nossa equipe garante que cada detalhe seja planejado com excelência.
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                {[
-                  "Estadias Premium e Ofertas Exclusivas",
-                  "Pacotes personalizados para cada viajante",
-                  "Suporte incomparável antes e durante as viagens"
-                ].map((item, index) => (
-                  <div key={index} className="flex items-start gap-3 group">
-                    <div className="mt-1 flex-shrink-0">
-                      <svg className="w-5 h-5 text-destructive group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
-                      </svg>
-                    </div>
-                    <p className="text-foreground font-medium text-lg">{item}</p>
-                  </div>
-                ))}
-              </div>
+            <div className="max-w-4xl">
+              <h2 className="text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+                Descubra o <span className="text-gradient">mundo conosco.</span>
+              </h2>
+              <p className="text-foreground/80 text-lg leading-relaxed mb-8">
+                De paisagens deslumbrantes a maravilhas culturais, criamos viagens que transformam destinos em realidade. Nossa equipe garante que cada detalhe seja planejado com excelência.
+              </p>
             </div>
 
-            {/* Imagem à direita */}
-            <div className="lg:w-[400px] flex items-stretch">
-              <div className="w-full rounded-3xl overflow-hidden hover-lift">
-                <img 
-                  src={discoverCristoRedentor} 
-                  alt="Cristo Redentor - Rio de Janeiro" 
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                />
-              </div>
+            <div className="grid md:grid-cols-3 gap-6 w-full max-w-5xl">
+              {[
+                "Estadias Premium e Ofertas Exclusivas",
+                "Pacotes personalizados para cada viajante",
+                "Suporte incomparável antes e durante as viagens"
+              ].map((item, index) => (
+                <div key={index} className="flex flex-col items-center gap-3 p-6 rounded-2xl glass-card group">
+                  <div className="flex-shrink-0">
+                    <svg className="w-6 h-6 text-destructive group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+                    </svg>
+                  </div>
+                  <p className="text-foreground font-medium text-lg">{item}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
