@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Navigation from "@/components/Navigation";
+import { supabase } from "@/integrations/supabase/client";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,18 +31,11 @@ import amazoniaImage from "@/assets/dest-amazonia.jpg";
 
 const destinations = [
   { id: "rio", name: "Rio de Janeiro, Brasil", image: rioImage, price: "R$ 1.299", description: "Cidade Maravilhosa com praias paradisíacas" },
-  { id: "noronha", name: "Fernando de Noronha, Brasil", image: noronhaImage, price: "R$ 2.499", description: "Arquipélago paradisíaco brasileiro" },
   { id: "paris", name: "Paris, França", image: parisImage, price: "R$ 3.499", description: "A cidade luz e do romance" },
-  { id: "iguazu", name: "Foz do Iguaçu, Brasil", image: iguazuImage, price: "R$ 1.599", description: "Maravilha natural brasileira" },
   { id: "maldives", name: "Maldivas", image: maldivesImage, price: "R$ 8.999", description: "Paraíso tropical" },
-  { id: "amazonia", name: "Amazônia, Brasil", image: amazoniaImage, price: "R$ 1.899", description: "Floresta tropical amazônica" },
   { id: "nyc", name: "Nova York, EUA", image: nycImage, price: "R$ 4.299", description: "A cidade que nunca dorme" },
   { id: "tokyo", name: "Tóquio, Japão", image: tokyoImage, price: "R$ 5.799", description: "Modernidade e tradição" },
   { id: "greece", name: "Santorini, Grécia", image: greeceImage, price: "R$ 6.499", description: "Ilhas gregas de tirar o fôlego" },
-  { id: "dubai", name: "Dubai, EAU", image: dubaiImage, price: "R$ 4.899", description: "Luxo e modernidade" },
-  { id: "london", name: "Londres, Inglaterra", image: londonImage, price: "R$ 3.799", description: "História e cultura" },
-  { id: "barcelona", name: "Barcelona, Espanha", image: barcelonaImage, price: "R$ 3.299", description: "Arte e arquitetura" },
-  { id: "sydney", name: "Sydney, Austrália", image: sydneyImage, price: "R$ 6.999", description: "Belezas naturais australianas" },
 ];
 
 const bookingSchema = z.object({
@@ -124,7 +118,7 @@ const Reserva = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
@@ -136,13 +130,37 @@ const Reserva = () => {
       
       const validatedData = bookingSchema.parse(submissionData);
       
+      // Save to database
+      const { error: dbError } = await supabase
+        .from('bookings')
+        .insert({
+          destination_id: destination.id,
+          destination_name: destination.name,
+          full_name: validatedData.fullName,
+          cpf: validatedData.cpf,
+          email: validatedData.email,
+          phone: validatedData.phone,
+          adults: validatedData.adults,
+          children: validatedData.children,
+          departure_date: validatedData.departureDate,
+          return_date: validatedData.returnDate || null,
+          total_price: totalPrice,
+        });
+
+      if (dbError) {
+        console.error("Database error:", dbError);
+        toast({
+          title: "Erro ao salvar reserva",
+          description: "Ocorreu um erro ao processar sua reserva. Tente novamente.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       toast({
         title: "Reserva enviada com sucesso!",
         description: "Entraremos em contato em breve para confirmar sua viagem.",
       });
-      
-      // Aqui você pode enviar os dados para o backend
-      console.log("Dados validados:", validatedData);
       
       // Redirecionar após alguns segundos
       setTimeout(() => {
