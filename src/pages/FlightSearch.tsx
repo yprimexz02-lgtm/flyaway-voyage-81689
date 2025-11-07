@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import FlightSearchForm from "@/components/FlightSearchForm";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, Plane, Clock, ArrowRight } from "lucide-react";
+import { Loader2, Plane, Clock, ArrowRight, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -35,6 +35,7 @@ interface FlightOffer {
 
 const FlightSearch = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [flights, setFlights] = useState<FlightOffer[]>([]);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -127,6 +128,14 @@ const FlightSearch = () => {
 
       <div className="pt-32 pb-20">
         <div className="container mx-auto px-4">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate("/")}
+            className="mb-6 hover:bg-primary/10"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Voltar
+          </Button>
           <h1 className="text-4xl font-bold mb-8 text-center">Buscar Voos</h1>
 
           <div className="mb-12">
