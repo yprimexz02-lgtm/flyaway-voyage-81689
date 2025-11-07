@@ -107,15 +107,15 @@ const Index = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-8">
-              <Button size="lg" className="bg-primary hover:bg-primary-light text-lg px-8 py-6 rounded-full glow">
-                Reserve já a sua visita guiada!
+              <Button size="lg" className="bg-primary hover:bg-primary-light hover:scale-105 hover:shadow-2xl text-lg px-8 py-6 rounded-full glow transition-all duration-300">
+                Fazer Cotação
               </Button>
             </div>
             
             <div className="text-center">
               <p className="text-lg mb-2">Entre em contato a qualquer momento.</p>
-              <a href="tel:3036667575" className="text-2xl font-bold hover:underline">
-                (303) 666-7575
+              <a href="tel:31982672334" className="text-2xl font-bold hover:underline">
+                (31) 98267-2334
               </a>
             </div>
           </div>
@@ -156,7 +156,7 @@ const Index = () => {
                   Descubra o <span className="text-gradient">mundo conosco.</span>
                 </h2>
                 <p className="text-foreground/80 text-lg leading-relaxed">
-                  De paisagens deslumbrantes a maravilhas culturais, criamos viagens que transformam destinos em realidade. Nossa equipe garante que cada detalhe seja planejado com excelência.
+                  De paisagens deslumbrantes a maravilhas culturais, como agente de viagens crio experiências que transformam destinos em realidade. Garanto que cada detalhe seja planejado com excelência.
                 </p>
                 <ul className="space-y-4">
                   <li className="flex items-start gap-3">

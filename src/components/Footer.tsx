@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Plane, Mail, Phone, MapPin, Facebook, Instagram, Twitter } from "lucide-react";
+import logo from "@/assets/logo-gfchaves-white.png";
 
 const Footer = () => {
   return (
@@ -9,13 +10,10 @@ const Footer = () => {
           {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <div className="p-2 bg-secondary rounded-lg">
-                <Plane className="w-6 h-6" />
-              </div>
-              <span className="text-2xl font-bold">TravelExpert</span>
+              <img src={logo} alt="GFChaves Travel Experience" className="h-12" />
             </div>
             <p className="text-primary-foreground/80 text-sm">
-              Sua agência de viagens de confiança. Realizamos sonhos e criamos memórias inesquecíveis.
+              Seu agente de viagens de confiança. Realizo sonhos e crio memórias inesquecíveis.
             </p>
             <div className="flex gap-3">
               <a href="#" className="p-2 bg-primary-foreground/10 hover:bg-primary-foreground/20 rounded-lg transition-colors">
@@ -74,11 +72,11 @@ const Footer = () => {
             <ul className="space-y-3">
               <li className="flex items-start gap-2 text-sm">
                 <Phone className="w-5 h-5 mt-0.5 flex-shrink-0" />
-                <span className="text-primary-foreground/80">(11) 3456-7890</span>
+                <span className="text-primary-foreground/80">(31) 98267-2334</span>
               </li>
               <li className="flex items-start gap-2 text-sm">
                 <Mail className="w-5 h-5 mt-0.5 flex-shrink-0" />
-                <span className="text-primary-foreground/80">contato@travelexpert.com</span>
+                <span className="text-primary-foreground/80">contato@gfchaves.com</span>
               </li>
               <li className="flex items-start gap-2 text-sm">
                 <MapPin className="w-5 h-5 mt-0.5 flex-shrink-0" />
@@ -92,7 +90,7 @@ const Footer = () => {
 
         <div className="border-t border-primary-foreground/10 mt-8 pt-8 text-center">
           <p className="text-primary-foreground/60 text-sm">
-            © 2025 TravelExpert. Todos os direitos reservados.
+            © 2025 GFChaves Travel Experience. Todos os direitos reservados.
           </p>
         </div>
       </div>
