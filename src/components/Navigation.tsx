@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import logo from "@/assets/logo.png";
 
 const Navigation = () => {
   const navLinks = [
@@ -12,8 +11,10 @@ const Navigation = () => {
     <nav className="fixed top-0 w-full z-50">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-20">
-          <Link to="/" className="flex items-center transition-transform duration-300 hover:scale-110">
-            <img src={logo} alt="GFCHAVES Travel Experience" className="h-16 brightness-0 invert" />
+          <Link to="/" className="group flex items-center transition-transform duration-300 hover:scale-110">
+            <span className="text-3xl font-bold text-white tracking-wider text-gradient group-hover:glow">
+              GFCHAVES
+            </span>
           </Link>
           
           <div className="flex items-center gap-8">
