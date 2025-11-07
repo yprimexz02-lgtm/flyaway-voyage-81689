@@ -11,9 +11,9 @@ const Navigation = () => {
   return (
     <nav className="fixed top-0 w-full z-50">
       <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center h-16">
-          <Link to="/" className="flex items-center">
-            <img src={logo} alt="GFCHAVES Travel Experience" className="h-10" />
+        <div className="flex justify-between items-center h-20">
+          <Link to="/" className="flex items-center transition-transform duration-300 hover:scale-110">
+            <img src={logo} alt="GFCHAVES Travel Experience" className="h-16 brightness-0 invert" />
           </Link>
           
           <div className="flex items-center gap-8">
