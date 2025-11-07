@@ -7,8 +7,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, User, FileText, Calendar, CreditCard, Shield, CheckCircle } from "lucide-react";
+import { ArrowLeft, User, FileText, Calendar as CalendarIcon, CreditCard, Shield, CheckCircle } from "lucide-react";
 import { z } from "zod";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 import parisImage from "@/assets/dest-paris.jpg";
 import maldivesImage from "@/assets/dest-maldives.jpg";
 import nycImage from "@/assets/dest-nyc.jpg";
@@ -64,10 +69,10 @@ const Reserva = () => {
     phone: "",
     adults: 1,
     children: 0,
-    departureDate: "",
-    returnDate: "",
   });
 
+  const [departureDate, setDepartureDate] = useState<Date>();
+  const [returnDate, setReturnDate] = useState<Date>();
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   if (!destination) {
@@ -123,7 +128,13 @@ const Reserva = () => {
     e.preventDefault();
     
     try {
-      const validatedData = bookingSchema.parse(formData);
+      const submissionData = {
+        ...formData,
+        departureDate: departureDate ? format(departureDate, "yyyy-MM-dd") : "",
+        returnDate: returnDate ? format(returnDate, "yyyy-MM-dd") : "",
+      };
+      
+      const validatedData = bookingSchema.parse(submissionData);
       
       toast({
         title: "Reserva enviada com sucesso!",
@@ -320,35 +331,78 @@ const Reserva = () => {
                     {/* Datas */}
                     <div className="space-y-4">
                       <h3 className="text-xl font-semibold flex items-center gap-2">
-                        <Calendar className="w-5 h-5 text-accent" />
+                        <CalendarIcon className="w-5 h-5 text-accent" />
                         Datas da Viagem
                       </h3>
                       
                       <div className="grid md:grid-cols-2 gap-4">
                         <div>
-                          <Label htmlFor="departureDate">Data de Ida *</Label>
-                          <Input
-                            id="departureDate"
-                            type="date"
-                            value={formData.departureDate}
-                            onChange={(e) => handleInputChange("departureDate", e.target.value)}
-                            min={new Date().toISOString().split('T')[0]}
-                            className={errors.departureDate ? "border-destructive" : ""}
-                          />
+                          <Label>Data de Ida *</Label>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                className={cn(
+                                  "w-full justify-start text-left font-normal",
+                                  !departureDate && "text-muted-foreground",
+                                  errors.departureDate && "border-destructive"
+                                )}
+                              >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {departureDate ? format(departureDate, "PPP", { locale: ptBR }) : "Selecione a data"}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={departureDate}
+                                onSelect={(date) => {
+                                  setDepartureDate(date);
+                                  if (errors.departureDate) {
+                                    setErrors(prev => {
+                                      const newErrors = { ...prev };
+                                      delete newErrors.departureDate;
+                                      return newErrors;
+                                    });
+                                  }
+                                }}
+                                disabled={(date) => date < new Date()}
+                                initialFocus
+                                className="pointer-events-auto"
+                              />
+                            </PopoverContent>
+                          </Popover>
                           {errors.departureDate && (
                             <p className="text-sm text-destructive mt-1">{errors.departureDate}</p>
                           )}
                         </div>
 
                         <div>
-                          <Label htmlFor="returnDate">Data de Volta</Label>
-                          <Input
-                            id="returnDate"
-                            type="date"
-                            value={formData.returnDate}
-                            onChange={(e) => handleInputChange("returnDate", e.target.value)}
-                            min={formData.departureDate || new Date().toISOString().split('T')[0]}
-                          />
+                          <Label>Data de Volta</Label>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                className={cn(
+                                  "w-full justify-start text-left font-normal",
+                                  !returnDate && "text-muted-foreground"
+                                )}
+                              >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {returnDate ? format(returnDate, "PPP", { locale: ptBR }) : "Selecione a data"}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={returnDate}
+                                onSelect={setReturnDate}
+                                disabled={(date) => date < (departureDate || new Date())}
+                                initialFocus
+                                className="pointer-events-auto"
+                              />
+                            </PopoverContent>
+                          </Popover>
                         </div>
                       </div>
                     </div>
