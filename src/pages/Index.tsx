@@ -29,19 +29,19 @@ const Index = () => {
   const featuresSection = useScrollReveal<HTMLElement>();
 
   const destinations = [
-    { name: "Rio de Janeiro, Brasil", image: rioImage, price: "R$ 1.299" },
-    { name: "Fernando de Noronha, Brasil", image: noronhaImage, price: "R$ 2.499" },
-    { name: "Paris, França", image: parisImage, price: "R$ 3.499" },
-    { name: "Foz do Iguaçu, Brasil", image: iguazuImage, price: "R$ 1.599" },
-    { name: "Maldivas", image: maldivesImage, price: "R$ 8.999" },
-    { name: "Amazônia, Brasil", image: amazoniaImage, price: "R$ 1.899" },
-    { name: "Nova York, EUA", image: nycImage, price: "R$ 4.299" },
-    { name: "Tóquio, Japão", image: tokyoImage, price: "R$ 5.799" },
-    { name: "Santorini, Grécia", image: greeceImage, price: "R$ 6.499" },
-    { name: "Dubai, EAU", image: dubaiImage, price: "R$ 4.899" },
-    { name: "Londres, Inglaterra", image: londonImage, price: "R$ 3.799" },
-    { name: "Barcelona, Espanha", image: barcelonaImage, price: "R$ 3.299" },
-    { name: "Sydney, Austrália", image: sydneyImage, price: "R$ 6.999" },
+    { id: "rio", name: "Rio de Janeiro, Brasil", image: rioImage, price: "R$ 1.299" },
+    { id: "noronha", name: "Fernando de Noronha, Brasil", image: noronhaImage, price: "R$ 2.499" },
+    { id: "paris", name: "Paris, França", image: parisImage, price: "R$ 3.499" },
+    { id: "iguazu", name: "Foz do Iguaçu, Brasil", image: iguazuImage, price: "R$ 1.599" },
+    { id: "maldives", name: "Maldivas", image: maldivesImage, price: "R$ 8.999" },
+    { id: "amazonia", name: "Amazônia, Brasil", image: amazoniaImage, price: "R$ 1.899" },
+    { id: "nyc", name: "Nova York, EUA", image: nycImage, price: "R$ 4.299" },
+    { id: "tokyo", name: "Tóquio, Japão", image: tokyoImage, price: "R$ 5.799" },
+    { id: "greece", name: "Santorini, Grécia", image: greeceImage, price: "R$ 6.499" },
+    { id: "dubai", name: "Dubai, EAU", image: dubaiImage, price: "R$ 4.899" },
+    { id: "london", name: "Londres, Inglaterra", image: londonImage, price: "R$ 3.799" },
+    { id: "barcelona", name: "Barcelona, Espanha", image: barcelonaImage, price: "R$ 3.299" },
+    { id: "sydney", name: "Sydney, Austrália", image: sydneyImage, price: "R$ 6.999" },
   ];
 
   const features = [
@@ -219,9 +219,10 @@ const Index = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {destinations.map((dest, index) => (
-              <div 
-                key={index} 
-                className={`group relative h-96 rounded-3xl overflow-hidden cursor-pointer hover-lift transition-all duration-700 ${
+              <Link 
+                key={index}
+                to={`/reserva/${dest.id}`}
+                className={`group relative h-96 rounded-3xl overflow-hidden cursor-pointer hover-lift transition-all duration-700 block ${
                   destinationsSection.isVisible 
                     ? "opacity-100 translate-y-0" 
                     : "opacity-0 translate-y-10"
@@ -253,11 +254,11 @@ const Index = () => {
                 <div className="absolute bottom-0 left-0 right-0 p-6 text-white group-hover:opacity-0 transition-opacity">
                   <div className="flex items-center gap-2 mb-2">
                     <MapPin className="w-5 h-5" />
-                    <h3 className="text-2xl font-bold">{dest.name}</h3>
-                  </div>
-                  <p className="text-lg">A partir de <span className="font-bold">{dest.price}</span></p>
+                  <h3 className="text-2xl font-bold">{dest.name}</h3>
                 </div>
+                <p className="text-lg">A partir de <span className="font-bold">{dest.price}</span></p>
               </div>
+              </Link>
             ))}
           </div>
         </div>

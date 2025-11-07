@@ -8,6 +8,7 @@ import FlightSearch from "./pages/FlightSearch";
 import Packages from "./pages/Packages";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import Reserva from "./pages/Reserva";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/pacotes" element={<Packages />} />
           <Route path="/sobre" element={<About />} />
           <Route path="/contato" element={<Contact />} />
+          <Route path="/reserva/:destinationId" element={<Reserva />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
