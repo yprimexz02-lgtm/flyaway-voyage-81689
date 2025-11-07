@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import logo from "@/assets/logo-gfchaves.png";
+import logo from "@/assets/logo-gfchaves-white.png";
 
 const Navigation = () => {
   const navLinks = [
@@ -13,7 +13,7 @@ const Navigation = () => {
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-20">
           <Link to="/" className="flex items-center transition-transform duration-300 hover:scale-110">
-            <img src={logo} alt="GFCHAVES" className="h-16 invert" />
+            <img src={logo} alt="GFCHAVES" className="h-16" />
           </Link>
           
           <div className="flex items-center gap-8">
