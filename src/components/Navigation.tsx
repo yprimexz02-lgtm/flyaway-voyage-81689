@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import logo from "@/assets/logo.png";
 
 const Navigation = () => {
   const navLinks = [
@@ -10,16 +11,22 @@ const Navigation = () => {
   return (
     <nav className="fixed top-0 w-full z-50">
       <div className="container mx-auto px-4">
-        <div className="flex justify-end items-center h-16 gap-8">
-          {navLinks.map((link) => (
-            <Link
-              key={link.path}
-              to={link.path}
-              className="text-sm font-medium text-white transition-transform duration-200 hover:scale-125"
-            >
-              {link.label}
-            </Link>
-          ))}
+        <div className="flex justify-between items-center h-16">
+          <Link to="/" className="flex items-center">
+            <img src={logo} alt="GFCHAVES Travel Experience" className="h-10" />
+          </Link>
+          
+          <div className="flex items-center gap-8">
+            {navLinks.map((link) => (
+              <Link
+                key={link.path}
+                to={link.path}
+                className="text-sm font-medium text-white transition-transform duration-200 hover:scale-125"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </nav>
