@@ -18,6 +18,10 @@ import dubaiImage from "@/assets/dest-dubai.jpg";
 import londonImage from "@/assets/dest-london.jpg";
 import barcelonaImage from "@/assets/dest-barcelona.jpg";
 import sydneyImage from "@/assets/dest-sydney.jpg";
+import rioImage from "@/assets/dest-rio.jpg";
+import noronhaImage from "@/assets/dest-noronha.jpg";
+import iguazuImage from "@/assets/dest-iguazu.jpg";
+import amazoniaImage from "@/assets/dest-amazonia.jpg";
 
 const Index = () => {
   const offersSection = useScrollReveal<HTMLElement>();
@@ -25,8 +29,12 @@ const Index = () => {
   const featuresSection = useScrollReveal<HTMLElement>();
 
   const destinations = [
+    { name: "Rio de Janeiro, Brasil", image: rioImage, price: "R$ 1.299" },
+    { name: "Fernando de Noronha, Brasil", image: noronhaImage, price: "R$ 2.499" },
     { name: "Paris, França", image: parisImage, price: "R$ 3.499" },
+    { name: "Foz do Iguaçu, Brasil", image: iguazuImage, price: "R$ 1.599" },
     { name: "Maldivas", image: maldivesImage, price: "R$ 8.999" },
+    { name: "Amazônia, Brasil", image: amazoniaImage, price: "R$ 1.899" },
     { name: "Nova York, EUA", image: nycImage, price: "R$ 4.299" },
     { name: "Tóquio, Japão", image: tokyoImage, price: "R$ 5.799" },
     { name: "Santorini, Grécia", image: greeceImage, price: "R$ 6.499" },
