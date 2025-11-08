@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -14,7 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Switch } from "@/components/ui/switch";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Loader2, Send } from "lucide-react";
+import { CalendarIcon, Loader2, Send, Plane } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
@@ -55,6 +55,67 @@ const Cotacao = () => {
     },
   });
 
+  const [showOriginSuggestions, setShowOriginSuggestions] = useState(false);
+  const [showDestinationSuggestions, setShowDestinationSuggestions] = useState(false);
+  const originRef = useRef<HTMLDivElement>(null);
+  const destinationRef = useRef<HTMLDivElement>(null);
+
+  const brazilianCities = [
+    { name: "São Paulo", code: "GRU" }, { name: "Rio de Janeiro", code: "GIG" },
+    { name: "Brasília", code: "BSB" }, { name: "Salvador", code: "SSA" },
+    { name: "Fortaleza", code: "FOR" }, { name: "Belo Horizonte", code: "CNF" },
+    { name: "Manaus", code: "MAO" }, { name: "Curitiba", code: "CWB" },
+    { name: "Recife", code: "REC" }, { name: "Porto Alegre", code: "POA" },
+    { name: "Belém", code: "BEL" }, { name: "Goiânia", code: "GYN" },
+    { name: "Campinas", code: "VCP" }, { name: "São Luís", code: "SLZ" },
+    { name: "Maceió", code: "MCZ" }, { name: "Natal", code: "NAT" },
+    { name: "João Pessoa", code: "JPA" }, { name: "Teresina", code: "THE" },
+    { name: "Campo Grande", code: "CGR" }, { name: "Cuiabá", code: "CGB" },
+    { name: "Florianópolis", code: "FLN" }, { name: "Vitória", code: "VIX" },
+    { name: "Aracaju", code: "AJU" }, { name: "Ribeirão Preto", code: "RAO" },
+    { name: "Uberlândia", code: "UDI" }, { name: "Juiz de Fora", code: "JDF" },
+    { name: "Londrina", code: "LDB" }, { name: "Joinville", code: "JOI" },
+    { name: "Foz do Iguaçu", code: "IGU" }, { name: "Navegantes", code: "NVT" },
+    { name: "Palmas", code: "PMW" }, { name: "Porto Seguro", code: "BPS" },
+    { name: "Ilhéus", code: "IOS" }, { name: "Imperatriz", code: "IMP" },
+    { name: "Santarém", code: "STM" }, { name: "Marabá", code: "MAB" },
+    { name: "Altamira", code: "ATM" }, { name: "Boa Vista", code: "BVB" },
+    { name: "Rio Branco", code: "RBR" }, { name: "Porto Velho", code: "PVH" },
+  ];
+
+  const getFilteredCities = (searchTerm: string) => {
+    if (!searchTerm) return [];
+    return brazilianCities.filter(city =>
+      city.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      city.code.toLowerCase().includes(searchTerm.toLowerCase())
+    ).slice(0, 8);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (originRef.current && !originRef.current.contains(event.target as Node)) {
+        setShowOriginSuggestions(false);
+      }
+      if (destinationRef.current && !destinationRef.current.contains(event.target as Node)) {
+        setShowDestinationSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const selectOrigin = (city: { name: string; code: string }) => {
+    const value = `${city.name} (${city.code})`;
+    form.setValue("origem", value, { shouldValidate: true });
+    setShowOriginSuggestions(false);
+  };
+
+  const selectDestination = (city: { name: string; code: string }) => {
+    const value = `${city.name} (${city.code})`;
+    form.setValue("destino", value, { shouldValidate: true });
+    setShowDestinationSuggestions(false);
+  };
+
   const formatPhoneNumber = (value: string) => {
     const numbers = value.replace(/\D/g, '');
     if (numbers.length <= 2) {
@@ -83,24 +144,18 @@ const Cotacao = () => {
         mensagem: `Olá! Recebemos seu pedido de cotação de ${data.origem} para ${data.destino}${data.somente_ida ? ' (somente ida)' : ''}. Nossa equipe entrará em contato pelo WhatsApp em breve. 🌎✈️`,
       };
 
-      // URL de teste - trocar para produção depois: https://yprimezx.app.n8n.cloud/webhook/cotacao-viagem
       const response = await fetch("https://yprimezx.app.n8n.cloud/webhook-test/cotacao-viagem", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      if (!response.ok) {
-        throw new Error("Erro ao enviar cotação");
-      }
+      if (!response.ok) throw new Error("Erro ao enviar cotação");
 
       toast({
         title: "Cotação enviada com sucesso! ✈️",
         description: "Nossa equipe entrará em contato pelo WhatsApp em breve.",
       });
-
       form.reset();
     } catch (error) {
       console.error("Erro ao enviar cotação:", error);
@@ -117,7 +172,6 @@ const Cotacao = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-
       <div className="pt-32 pb-20">
         <div className="container mx-auto px-4 max-w-3xl">
           <Card className="backdrop-blur-sm bg-card/95 border-primary/20 shadow-xl">
@@ -129,7 +183,6 @@ const Cotacao = () => {
                 Preencha o formulário abaixo e entraremos em contato pelo WhatsApp com as melhores opções para sua viagem
               </CardDescription>
             </CardHeader>
-
             <CardContent>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -146,37 +199,92 @@ const Cotacao = () => {
                       </FormItem>
                     )}
                   />
-
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <FormField
                       control={form.control}
                       name="origem"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem ref={originRef}>
                           <FormLabel>Origem *</FormLabel>
                           <FormControl>
-                            <Input placeholder="De onde você vai partir?" {...field} />
+                            <div className="relative">
+                              <Plane className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10" />
+                              <Input
+                                placeholder="De onde você vai partir?"
+                                className="pl-10"
+                                {...field}
+                                onFocus={() => setShowOriginSuggestions(true)}
+                                onChange={(e) => {
+                                  field.onChange(e.target.value);
+                                  setShowOriginSuggestions(true);
+                                }}
+                                autoComplete="off"
+                              />
+                              {showOriginSuggestions && field.value && getFilteredCities(field.value).length > 0 && (
+                                <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-lg shadow-lg max-h-60 overflow-auto">
+                                  {getFilteredCities(field.value).map((city) => (
+                                    <button
+                                      key={city.code}
+                                      type="button"
+                                      onClick={() => selectOrigin(city)}
+                                      className="w-full px-4 py-3 text-left hover:bg-accent transition-colors flex items-center gap-2"
+                                    >
+                                      <Plane className="w-4 h-4 text-muted-foreground" />
+                                      <span className="font-medium">{city.name}</span>
+                                      <span className="text-sm text-muted-foreground">({city.code})</span>
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-
                     <FormField
                       control={form.control}
                       name="destino"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem ref={destinationRef}>
                           <FormLabel>Destino *</FormLabel>
                           <FormControl>
-                            <Input placeholder="Para onde você quer ir?" {...field} />
+                            <div className="relative">
+                              <Plane className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground rotate-90 z-10" />
+                              <Input
+                                placeholder="Para onde você quer ir?"
+                                className="pl-10"
+                                {...field}
+                                onFocus={() => setShowDestinationSuggestions(true)}
+                                onChange={(e) => {
+                                  field.onChange(e.target.value);
+                                  setShowDestinationSuggestions(true);
+                                }}
+                                autoComplete="off"
+                              />
+                              {showDestinationSuggestions && field.value && getFilteredCities(field.value).length > 0 && (
+                                <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-lg shadow-lg max-h-60 overflow-auto">
+                                  {getFilteredCities(field.value).map((city) => (
+                                    <button
+                                      key={city.code}
+                                      type="button"
+                                      onClick={() => selectDestination(city)}
+                                      className="w-full px-4 py-3 text-left hover:bg-accent transition-colors flex items-center gap-2"
+                                    >
+                                      <Plane className="w-4 h-4 text-muted-foreground rotate-90" />
+                                      <span className="font-medium">{city.name}</span>
+                                      <span className="text-sm text-muted-foreground">({city.code})</span>
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                   </div>
-
                   <FormField
                     control={form.control}
                     name="somente_ida"
@@ -184,20 +292,14 @@ const Cotacao = () => {
                       <FormItem className="flex flex-row items-center justify-between rounded-lg border border-border p-4">
                         <div className="space-y-0.5">
                           <FormLabel className="text-base">Somente Ida</FormLabel>
-                          <div className="text-sm text-muted-foreground">
-                            Deseja apenas passagem de ida?
-                          </div>
+                          <div className="text-sm text-muted-foreground">Deseja apenas passagem de ida?</div>
                         </div>
                         <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
+                          <Switch checked={field.value} onCheckedChange={field.onChange} />
                         </FormControl>
                       </FormItem>
                     )}
                   />
-
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <FormField
                       control={form.control}
@@ -210,16 +312,9 @@ const Cotacao = () => {
                               <FormControl>
                                 <Button
                                   variant="outline"
-                                  className={cn(
-                                    "w-full pl-3 text-left font-normal",
-                                    !field.value && "text-muted-foreground"
-                                  )}
+                                  className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
                                 >
-                                  {field.value ? (
-                                    format(field.value, "PPP", { locale: ptBR })
-                                  ) : (
-                                    <span>Selecione a data</span>
-                                  )}
+                                  {field.value ? format(field.value, "PPP", { locale: ptBR }) : <span>Selecione a data</span>}
                                   <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                 </Button>
                               </FormControl>
@@ -239,7 +334,6 @@ const Cotacao = () => {
                         </FormItem>
                       )}
                     />
-
                     {!form.watch("somente_ida") && (
                       <FormField
                         control={form.control}
@@ -252,16 +346,9 @@ const Cotacao = () => {
                                 <FormControl>
                                   <Button
                                     variant="outline"
-                                    className={cn(
-                                      "w-full pl-3 text-left font-normal",
-                                      !field.value && "text-muted-foreground"
-                                    )}
+                                    className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
                                   >
-                                    {field.value ? (
-                                      format(field.value, "PPP", { locale: ptBR })
-                                    ) : (
-                                      <span>Selecione a data</span>
-                                    )}
+                                    {field.value ? format(field.value, "PPP", { locale: ptBR }) : <span>Selecione a data</span>}
                                     <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                   </Button>
                                 </FormControl>
@@ -283,7 +370,6 @@ const Cotacao = () => {
                       />
                     )}
                   </div>
-
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <FormField
                       control={form.control}
@@ -292,8 +378,8 @@ const Cotacao = () => {
                         <FormItem>
                           <FormLabel>WhatsApp *</FormLabel>
                           <FormControl>
-                            <Input 
-                              placeholder="(31) 98267-2334" 
+                            <Input
+                              placeholder="(31) 98267-2334"
                               {...field}
                               onChange={(e) => {
                                 const formatted = formatPhoneNumber(e.target.value);
@@ -306,7 +392,6 @@ const Cotacao = () => {
                         </FormItem>
                       )}
                     />
-
                     <FormField
                       control={form.control}
                       name="quantidade_pessoas"
@@ -314,9 +399,9 @@ const Cotacao = () => {
                         <FormItem>
                           <FormLabel>Quantidade de Pessoas *</FormLabel>
                           <FormControl>
-                            <Input 
-                              type="number" 
-                              placeholder="1" 
+                            <Input
+                              type="number"
+                              placeholder="1"
                               min="1"
                               max="50"
                               {...field}
@@ -328,7 +413,6 @@ const Cotacao = () => {
                       )}
                     />
                   </div>
-
                   <Button
                     type="submit"
                     size="lg"
@@ -336,15 +420,9 @@ const Cotacao = () => {
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
-                      <>
-                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                        Enviando...
-                      </>
+                      <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Enviando...</>
                     ) : (
-                      <>
-                        <Send className="w-5 h-5 mr-2" />
-                        Enviar Cotação
-                      </>
+                      <><Send className="w-5 h-5 mr-2" /> Enviar Cotação</>
                     )}
                   </Button>
                 </form>
@@ -353,7 +431,6 @@ const Cotacao = () => {
           </Card>
         </div>
       </div>
-
       <Footer />
     </div>
   );
