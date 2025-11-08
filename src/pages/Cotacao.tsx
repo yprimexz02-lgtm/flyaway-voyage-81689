@@ -60,7 +60,7 @@ const Cotacao = () => {
   const originRef = useRef<HTMLDivElement>(null);
   const destinationRef = useRef<HTMLDivElement>(null);
 
-  const brazilianCities = [
+  const popularCities = [
     { name: "São Paulo", code: "GRU" }, { name: "Rio de Janeiro", code: "GIG" },
     { name: "Brasília", code: "BSB" }, { name: "Salvador", code: "SSA" },
     { name: "Fortaleza", code: "FOR" }, { name: "Belo Horizonte", code: "CNF" },
@@ -81,11 +81,19 @@ const Cotacao = () => {
     { name: "Santarém", code: "STM" }, { name: "Marabá", code: "MAB" },
     { name: "Altamira", code: "ATM" }, { name: "Boa Vista", code: "BVB" },
     { name: "Rio Branco", code: "RBR" }, { name: "Porto Velho", code: "PVH" },
+    { name: "Lisboa", code: "LIS" }, { name: "Paris", code: "CDG" },
+    { name: "Londres", code: "LHR" }, { name: "Nova York", code: "JFK" },
+    { name: "Miami", code: "MIA" }, { name: "Orlando", code: "MCO" },
+    { name: "Buenos Aires", code: "EZE" }, { name: "Santiago", code: "SCL" },
+    { name: "Madri", code: "MAD" }, { name: "Roma", code: "FCO" },
+    { name: "Tóquio", code: "NRT" }, { name: "Dubai", code: "DXB" },
+    { name: "Cancún", code: "CUN" }, { name: "Amsterdã", code: "AMS" },
+    { name: "Frankfurt", code: "FRA" },
   ];
 
   const getFilteredCities = (searchTerm: string) => {
     if (!searchTerm) return [];
-    return brazilianCities.filter(city =>
+    return popularCities.filter(city =>
       city.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       city.code.toLowerCase().includes(searchTerm.toLowerCase())
     ).slice(0, 8);
