@@ -108,7 +108,7 @@ const Index = () => {
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-8">
               <Button size="lg" className="bg-primary hover:bg-primary-light hover:scale-105 hover:shadow-2xl text-lg px-8 py-6 rounded-full glow transition-all duration-300" asChild>
-                <Link to="/cotacao">Fazer Cotação</Link>
+                <Link to="/buscar-voos">Fazer Cotação</Link>
               </Button>
             </div>
             
