@@ -9,7 +9,6 @@ import Packages from "./pages/Packages";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Reserva from "./pages/Reserva";
-import Cotacao from "./pages/Cotacao";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,7 +22,6 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/buscar-voos" element={<FlightSearch />} />
-          <Route path="/cotacao" element={<Cotacao />} />
           <Route path="/pacotes" element={<Packages />} />
           <Route path="/sobre" element={<About />} />
           <Route path="/contato" element={<Contact />} />
