@@ -4,9 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import LocationAutocomplete from "@/components/LocationAutocomplete";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Calendar } from "@/components/ui/calendar";
@@ -155,7 +155,12 @@ const Cotacao = () => {
                         <FormItem>
                           <FormLabel>Origem *</FormLabel>
                           <FormControl>
-                            <Input placeholder="De onde você vai partir?" {...field} />
+                            <LocationAutocomplete
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder="De onde você vai partir?"
+                              icon="plane"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -169,7 +174,12 @@ const Cotacao = () => {
                         <FormItem>
                           <FormLabel>Destino *</FormLabel>
                           <FormControl>
-                            <Input placeholder="Para onde você quer ir?" {...field} />
+                            <LocationAutocomplete
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder="Para onde você quer ir?"
+                              icon="mappin"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
