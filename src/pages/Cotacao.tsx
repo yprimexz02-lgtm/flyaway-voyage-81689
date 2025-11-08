@@ -137,8 +137,7 @@ const Cotacao = () => {
 
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
-    console.log("Enviando cotação:", data);
-
+    
     try {
       const payload = {
         nome: data.nome,
@@ -146,10 +145,8 @@ const Cotacao = () => {
         destino: data.destino,
         data_partida: format(data.data_partida, "yyyy-MM-dd"),
         data_retorno: data.somente_ida ? null : (data.data_retorno ? format(data.data_retorno, "yyyy-MM-dd") : null),
-        somente_ida: data.somente_ida,
-        numero_whatsapp: data.telefone,
-        quantidade_pessoas: data.quantidade_pessoas,
-        mensagem: `Olá! Recebemos seu pedido de cotação de ${data.origem} para ${data.destino}${data.somente_ida ? ' (somente ida)' : ''}. Nossa equipe entrará em contato pelo WhatsApp em breve. 🌎✈️`,
+        whatsapp: data.telefone,
+        pessoas: data.quantidade_pessoas,
       };
 
       const response = await fetch("https://yprimezx.app.n8n.cloud/webhook-test/cotacao-viagem", {
@@ -161,8 +158,8 @@ const Cotacao = () => {
       if (!response.ok) throw new Error("Erro ao enviar cotação");
 
       toast({
-        title: "Cotação enviada com sucesso! ✈️",
-        description: "Nossa equipe entrará em contato pelo WhatsApp em breve.",
+        title: "Sua cotação foi enviada com sucesso! ✅",
+        description: "Nossa equipe entrará em contato em breve.",
       });
       form.reset();
     } catch (error) {
