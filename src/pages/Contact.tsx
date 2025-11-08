@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Phone, Mail, MapPin, Clock, Send } from "lucide-react";
+import { Phone, Mail, MapPin, Clock, Send, ArrowLeft } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
 const Contact = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -61,6 +63,14 @@ const Contact = () => {
 
       <div className="pt-32 pb-20">
         <div className="container mx-auto px-4">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate("/")}
+            className="mb-6 hover:bg-primary/10"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Voltar
+          </Button>
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">Entre em Contato</h1>
             <p className="text-lg text-muted-foreground">

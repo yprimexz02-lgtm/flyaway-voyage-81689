@@ -4,8 +4,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, MapPin, Calendar, Users } from "lucide-react";
+import { Search, MapPin, Calendar, Users, ArrowLeft } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import parisImage from "@/assets/dest-paris.jpg";
 import maldivesImage from "@/assets/dest-maldives.jpg";
@@ -21,6 +22,7 @@ const Packages = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [priceFilter, setPriceFilter] = useState("all");
   const packagesSection = useScrollReveal<HTMLDivElement>();
+  const navigate = useNavigate();
 
   const packages = [
     {
@@ -140,6 +142,14 @@ const Packages = () => {
 
       <div className="pt-32 pb-20">
         <div className="container mx-auto px-4">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate("/")}
+            className="mb-6 hover:bg-primary/10"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Voltar
+          </Button>
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">Pacotes de Viagem</h1>
             <p className="text-lg text-muted-foreground">
