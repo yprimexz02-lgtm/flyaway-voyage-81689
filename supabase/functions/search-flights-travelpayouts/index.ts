@@ -84,7 +84,6 @@ serve(async (req) => {
 
     // Step 2: Poll for results until the search is complete
     let allResults: any[] = [];
-    let isSearchComplete = false;
     for (let i = 0; i < 30; i++) { // Poll for up to 90 seconds
       await delay(3000);
       const resultsResponse = await fetch(`https://api.travelpayouts.com/v1/flight_search_results?uuid=${uuid}`, {
@@ -96,7 +95,6 @@ serve(async (req) => {
         if (data && Array.isArray(data) && data.length > 0) {
           allResults.push(...data);
           if (data.some(item => item.search_completed === true)) {
-            isSearchComplete = true;
             break;
           }
         }
@@ -117,31 +115,40 @@ serve(async (req) => {
     const RUB_TO_EUR_RATE = 0.01; // Approximate conversion rate
 
     const transformedData = finalResults.map((flight: any, index: number) => {
+      if (!flight.proposals || !flight.price) return null;
+
       const itineraries = flight.proposals.map((proposal: any) => {
+        if (!proposal.segment) return null;
+        
         proposal.segment.forEach((s: any) => {
-          carriers[s.flight.carrier] = s.flight.carrier_name;
+          if (s?.flight?.carrier && s?.flight?.carrier_name) {
+            carriers[s.flight.carrier] = s.flight.carrier_name;
+          }
         });
+
         return {
           duration: formatDurationFromMinutes(proposal.total_duration_minutes),
           segments: proposal.segment.map((segment: any) => ({
             departure: { iataCode: segment.departure_code, at: new Date(segment.departure_date).toISOString() },
             arrival: { iataCode: segment.arrival_code, at: new Date(segment.arrival_date).toISOString() },
-            carrierCode: segment.flight.carrier,
-            number: segment.flight.number,
+            carrierCode: segment.flight?.carrier,
+            number: segment.flight?.number,
             duration: formatDurationFromMinutes(segment.flight_duration_minutes),
           })),
         };
-      });
+      }).filter(Boolean);
+
+      if (itineraries.length === 0) return null;
 
       return {
         id: `tp-${uuid}-${index}`,
         price: {
           total: (flight.price * RUB_TO_EUR_RATE).toFixed(2),
-          currency: 'EUR', // Standardize to EUR to match Amadeus
+          currency: 'EUR',
         },
         itineraries,
       };
-    });
+    }).filter(Boolean);
 
     return new Response(JSON.stringify({ data: transformedData, dictionaries: { carriers } }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
