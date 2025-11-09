@@ -38,7 +38,9 @@ serve(async (req) => {
     const { origin, destination, departureDate, returnDate, adults, children, infants, travelClass } = await req.json();
     const apiToken = Deno.env.get('TRAVELPAYOUTS_API_TOKEN');
     const marker = Deno.env.get('TRAVELPAYOUTS_MARKER');
-    const userIp = req.headers.get("x-forwarded-for")?.split(',')[0].trim() || "127.0.0.1";
+    
+    // Diagnostic step: Hardcode the IP address to rule out detection issues.
+    const userIp = "8.8.8.8"; 
 
     if (!apiToken || !marker) {
       throw new Error('Travelpayouts API token or marker not configured');
@@ -56,7 +58,6 @@ serve(async (req) => {
     const passengersString = `${adults}:${children || 0}:${infants || 0}`;
     const locale = 'pt';
 
-    // Corrected signature generation according to documentation: MD5(TOKEN:MARKER:USER_IP:LOCALE:TRIP_CLASS:PASSENGERS:SEGMENTS)
     const signatureString = [
       apiToken,
       marker,
@@ -67,6 +68,7 @@ serve(async (req) => {
       directionsStringForSignature,
     ].join(':');
 
+    console.log("Generating signature with string:", signatureString);
     const signature = md5(signatureString);
 
     const searchBody = {
@@ -137,7 +139,7 @@ serve(async (req) => {
     }
 
     const carriers: Record<string, string> = {};
-    const RUB_TO_EUR_RATE = 0.01;
+    const RUB_TO_EUR_rate = 0.01;
 
     const transformedData = finalResults.map((flight: any, index: number) => {
       if (!flight.proposals || !flight.price) return null;
@@ -160,7 +162,7 @@ serve(async (req) => {
       if (itineraries.length === 0) return null;
       return {
         id: `tp-${uuid}-${index}`,
-        price: { total: (flight.price * RUB_TO_EUR_RATE).toFixed(2), currency: 'EUR' },
+        price: { total: (flight.price * RUB_TO_EUR_rate).toFixed(2), currency: 'EUR' },
         itineraries,
       };
     }).filter(Boolean);
