@@ -149,7 +149,7 @@ const Cotacao = () => {
         pessoas: data.quantidade_pessoas,
       };
 
-      const response = await fetch("https://yprimezx.app.n8n.cloud/webhook-test/cotacao-viagem", {
+      const response = await fetch("https://yprimexz.app.n8n.cloud/webhook/cotacao-viagem", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -158,15 +158,13 @@ const Cotacao = () => {
       if (!response.ok) throw new Error("Erro ao enviar cotação");
 
       toast({
-        title: "Sua cotação foi enviada com sucesso! ✅",
-        description: "Nossa equipe entrará em contato em breve.",
+        title: "✅ Cotação enviada com sucesso! Entraremos em contato pelo WhatsApp.",
       });
       form.reset();
     } catch (error) {
       console.error("Erro ao enviar cotação:", error);
       toast({
-        title: "Erro ao enviar cotação",
-        description: "Por favor, tente novamente ou entre em contato pelo WhatsApp (31) 98267-2334.",
+        title: "❌ Erro ao enviar cotação. Tente novamente.",
         variant: "destructive",
       });
     } finally {
