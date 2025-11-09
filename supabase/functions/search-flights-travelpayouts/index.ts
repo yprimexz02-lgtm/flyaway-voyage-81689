@@ -35,16 +35,19 @@ serve(async (req) => {
   }
 
   try {
-    const { origin, destination, departureDate, returnDate, adults, children, infants, travelClass } = await req.json();
+    console.log('Function invoked. Checking secrets...');
     const apiToken = Deno.env.get('TRAVELPAYOUTS_API_TOKEN');
     const marker = Deno.env.get('TRAVELPAYOUTS_MARKER');
     
-    // Diagnostic step: Hardcode the IP address to rule out detection issues.
-    const userIp = "8.8.8.8"; 
+    console.log(`API Token loaded: ${apiToken ? 'Yes' : 'No'}`);
+    console.log(`Marker loaded: ${marker ? 'Yes' : 'No'}`);
 
     if (!apiToken || !marker) {
-      throw new Error('Travelpayouts API token or marker not configured');
+      throw new Error('Travelpayouts API token or marker not configured in Supabase secrets.');
     }
+
+    const { origin, destination, departureDate, returnDate, adults, children, infants, travelClass } = await req.json();
+    const userIp = req.headers.get("x-forwarded-for")?.split(',')[0].trim() || "127.0.0.1";
 
     const directionsForApi = [{ origin: origin.toUpperCase(), destination: destination.toUpperCase(), date: departureDate }];
     if (returnDate) {
@@ -68,7 +71,6 @@ serve(async (req) => {
       directionsStringForSignature,
     ].join(':');
 
-    console.log("Generating signature with string:", signatureString);
     const signature = md5(signatureString);
 
     const searchBody = {
@@ -139,7 +141,7 @@ serve(async (req) => {
     }
 
     const carriers: Record<string, string> = {};
-    const RUB_TO_EUR_rate = 0.01;
+    const RUB_TO_EUR_RATE = 0.01;
 
     const transformedData = finalResults.map((flight: any, index: number) => {
       if (!flight.proposals || !flight.price) return null;
@@ -162,7 +164,7 @@ serve(async (req) => {
       if (itineraries.length === 0) return null;
       return {
         id: `tp-${uuid}-${index}`,
-        price: { total: (flight.price * RUB_TO_EUR_rate).toFixed(2), currency: 'EUR' },
+        price: { total: (flight.price * RUB_TO_EUR_RATE).toFixed(2), currency: 'EUR' },
         itineraries,
       };
     }).filter(Boolean);
