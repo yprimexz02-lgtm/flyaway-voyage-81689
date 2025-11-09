@@ -49,7 +49,6 @@ serve(async (req) => {
       directionsForApi.push({ origin: destination.toUpperCase(), destination: origin.toUpperCase(), date: returnDate });
     }
 
-    // --- Signature Generation ---
     const locale = 'pt';
     const directionsStringForSignature = directionsForApi.map(d => 
       `${formatDateForSignature(d.date)}${d.origin}${d.destination}`
@@ -68,7 +67,6 @@ serve(async (req) => {
     ].join(':');
 
     const signature = md5(signatureString);
-    // --- End of Signature Generation ---
 
     const searchBody = {
       signature: signature,
@@ -91,15 +89,27 @@ serve(async (req) => {
       body: JSON.stringify(searchBody),
     });
 
+    const initData = await initResponse.json();
+
     if (!initResponse.ok) {
-      const errorText = await initResponse.text();
-      console.error("Failed to initiate search:", errorText);
-      return new Response(JSON.stringify({ error: `API Error (${initResponse.status}): ${errorText}` }), {
-        status: 200,
+      console.error("Failed to initiate search:", initData);
+      const errorMessage = initData.message || JSON.stringify(initData);
+      return new Response(JSON.stringify({ error: `API Error (${initResponse.status}): ${errorMessage}` }), {
+        status: initResponse.status,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
-    const { uuid } = await initResponse.json();
+
+    if (!initData.uuid) {
+      console.error("API did not return a search UUID. Response:", initData);
+      const errorMessage = initData.message || JSON.stringify(initData);
+      return new Response(JSON.stringify({ error: `Failed to start search: ${errorMessage}` }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    const { uuid } = initData;
 
     let allResults: any[] = [];
     for (let i = 0; i < 30; i++) {
@@ -159,7 +169,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in search-flights-travelpayouts function:', error);
     return new Response(JSON.stringify({ error: error.message }), {
-      status: 200,
+      status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   }
