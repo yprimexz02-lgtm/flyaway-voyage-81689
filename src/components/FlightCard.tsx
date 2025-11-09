@@ -131,15 +131,13 @@ const FlightCard = ({ flight, carriers }: FlightCardProps) => {
 
         {/* Price and CTA Section */}
         <div className="bg-muted/30 lg:w-64 flex flex-col justify-center items-center p-6 border-t lg:border-t-0 lg:border-l border-border">
-          <p className="text-sm text-muted-foreground">Preço total</p>
-          <p className="text-3xl font-extrabold text-foreground mb-1">
+          <p className="text-sm text-muted-foreground">Preço total GFC Travel</p>
+          <p className="text-3xl font-extrabold text-gradient mb-2">
+            {estimatePriceInBRL(flight.price.total, flight.price.currency)}
+          </p>
+          <p className="text-sm text-muted-foreground">Preço pela companhia</p>
+          <p className="text-lg font-semibold text-foreground mb-4">
             {new Intl.NumberFormat("de-DE", { style: "currency", currency: flight.price.currency }).format(parseFloat(flight.price.total))}
-          </p>
-          <p className="text-lg text-gradient font-bold mb-4">
-            ~ {estimatePriceInBRL(flight.price.total, flight.price.currency)}
-          </p>
-          <p className="text-xs text-muted-foreground text-center mb-4">
-            Taxas inclusas. Valor em BRL é uma estimativa.
           </p>
           <Button size="lg" className="w-full bg-gradient-to-r from-primary to-secondary hover:shadow-glow">
             Selecionar Voo
