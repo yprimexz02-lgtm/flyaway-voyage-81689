@@ -63,65 +63,45 @@ const FlightSearch = () => {
       returnDate: searchParams.get("returnDate") || undefined,
       adults: parseInt(searchParams.get("adults") || "1"),
       travelClass: searchParams.get("travelClass") || "ECONOMY",
-      max: 5, // Request 5 from each source
+      max: 10,
     };
 
-    // Invoke both functions in parallel
-    const amadeusPromise = supabase.functions.invoke("search-flights", { body: searchData });
-    const travelpayoutsPromise = supabase.functions.invoke("search-flights-travelpayouts", { body: searchData });
+    try {
+      const { data, error } = await supabase.functions.invoke("search-flights-travelpayouts", { body: searchData });
 
-    const results = await Promise.allSettled([amadeusPromise, travelpayoutsPromise]);
-    
-    setLoading(false);
+      if (error || data.error) {
+        throw new Error(error?.message || data.error);
+      }
 
-    let allFlights: FlightOffer[] = [];
-    let allDictionaries: any = { carriers: {} };
-    let hasErrors = false;
+      const flightResults: FlightOffer[] = data.data || [];
+      const flightDictionaries = data.dictionaries || {};
 
-    // Process Amadeus results
-    const amadeusResult = results[0];
-    if (amadeusResult.status === 'fulfilled' && !amadeusResult.value.data.error) {
-      allFlights.push(...(amadeusResult.value.data.data || []));
-      Object.assign(allDictionaries.carriers, amadeusResult.value.data.dictionaries?.carriers || {});
-    } else {
-      console.error("Amadeus API Error:", amadeusResult.status === 'fulfilled' ? amadeusResult.value.data.error : amadeusResult.reason);
-      hasErrors = true;
-    }
+      flightResults.sort((a, b) => parseFloat(a.price.total) - parseFloat(b.price.total));
 
-    // Process Travelpayouts results
-    const travelpayoutsResult = results[1];
-    if (travelpayoutsResult.status === 'fulfilled' && !travelpayoutsResult.value.data.error) {
-      allFlights.push(...(travelpayoutsResult.value.data.data || []));
-      Object.assign(allDictionaries.carriers, travelpayoutsResult.value.data.dictionaries?.carriers || {});
-    } else {
-      console.error("Travelpayouts API Error:", travelpayoutsResult.status === 'fulfilled' ? travelpayoutsResult.value.data.error : travelpayoutsResult.reason);
-      hasErrors = true;
-    }
+      setFlights(flightResults);
+      setDictionaries(flightDictionaries);
 
-    // Sort all flights by price
-    allFlights.sort((a, b) => parseFloat(a.price.total) - parseFloat(b.price.total));
-
-    setFlights(allFlights);
-    setDictionaries(allDictionaries);
-
-    if (allFlights.length > 0) {
-      toast({
-        title: "Voos encontrados!",
-        description: `Encontramos ${allFlights.length} opções para você.`,
-      });
-      if (hasErrors) {
+      if (flightResults.length > 0) {
         toast({
-          title: "Aviso",
-          description: "Alguns dos nossos provedores de voos não responderam. A lista pode estar incompleta.",
+          title: "Voos encontrados!",
+          description: `Encontramos ${flightResults.length} opções para você.`,
+        });
+      } else {
+        toast({
+          title: "Nenhum voo encontrado",
+          description: "Tente ajustar seus critérios de busca.",
           variant: "destructive",
         });
       }
-    } else {
+    } catch (err) {
+      console.error("Travelpayouts API Error:", err);
       toast({
-        title: "Nenhum voo encontrado",
-        description: "Tente ajustar seus critérios de busca.",
+        title: "Erro na busca",
+        description: "Não foi possível buscar os voos. Por favor, tente novamente mais tarde.",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 

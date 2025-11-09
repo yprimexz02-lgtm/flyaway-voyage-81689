@@ -111,15 +111,16 @@ const Cotacao = () => {
         returnDate: data.somente_ida ? undefined : (data.data_retorno ? format(data.data_retorno, "yyyy-MM-dd") : undefined),
         adults: data.quantidade_pessoas,
         travelClass: "ECONOMY",
-        max: 5,
       };
-      const { data: flightData, error: flightError } = await supabase.functions.invoke("search-flights", { body: searchData });
-      if (flightError) throw flightError;
+      const { data: flightData, error: flightError } = await supabase.functions.invoke("search-flights-travelpayouts", { body: searchData });
+      if (flightError || flightData.error) throw new Error(flightError?.message || flightData.error);
+      
       let cheapestPrice = 0;
       if (flightData?.data && flightData.data.length > 0) {
         const prices = flightData.data.map((f: { price: { total: string } }) => parseFloat(f.price.total));
-        cheapestPrice = Math.min(...prices) * 6.15;
+        cheapestPrice = Math.min(...prices) * 5.85;
       }
+      
       const { error: dbError } = await supabase.from('bookings').insert({
         destination_id: `${data.origem}-${data.destino}`,
         destination_name: `Cotação: ${data.origem} para ${data.destino}`,
@@ -134,6 +135,7 @@ const Cotacao = () => {
         total_price: cheapestPrice,
       });
       if (dbError) throw dbError;
+      
       toast({
         title: "Solicitação Enviada com Sucesso!",
         description: "Recebemos seu pedido. Entraremos em contato em breve pelo WhatsApp com as melhores cotações.",
