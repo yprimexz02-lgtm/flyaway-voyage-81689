@@ -84,7 +84,10 @@ serve(async (req) => {
 
     const initResponse = await fetch('https://api.travelpayouts.com/v1/flight_search', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'X-Access-Token': apiToken 
+      },
       body: JSON.stringify(searchBody),
     });
 
