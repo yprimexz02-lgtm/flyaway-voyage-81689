@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { Md5 } from "https://deno.land/std@0.190.0/hash/md5.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -23,6 +24,11 @@ const formatDurationFromMinutes = (minutes: number) => {
   return `PT${h}H${m}M`;
 };
 
+const formatDateForSignature = (dateStr: string) => {
+  const [year, month, day] = dateStr.split('-');
+  return `${day}${month}${year.slice(2)}`;
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -38,24 +44,48 @@ serve(async (req) => {
       throw new Error('Travelpayouts API token or marker not configured');
     }
 
-    const directions = [{ origin: origin.toUpperCase(), destination: destination.toUpperCase(), date: departureDate }];
+    const directionsForApi = [{ origin: origin.toUpperCase(), destination: destination.toUpperCase(), date: departureDate }];
     if (returnDate) {
-      directions.push({ origin: destination.toUpperCase(), destination: origin.toUpperCase(), date: returnDate });
+      directionsForApi.push({ origin: destination.toUpperCase(), destination: origin.toUpperCase(), date: returnDate });
     }
 
+    // --- Signature Generation ---
+    const locale = 'pt';
+    const directionsStringForSignature = directionsForApi.map(d => 
+      `${formatDateForSignature(d.date)}${d.origin}${d.destination}`
+    ).join(',');
+
+    const signatureString = [
+      apiToken,
+      marker,
+      userIp,
+      locale,
+      mapTravelClass(travelClass),
+      adults,
+      children || 0,
+      infants || 0,
+      directionsStringForSignature
+    ].join(':');
+
+    const md5 = new Md5();
+    const signature = md5.update(signatureString).toString();
+    // --- End of Signature Generation ---
+
     const searchBody = {
+      signature: signature,
       marker: marker,
       user_ip: userIp,
       search_params: {
+        locale: locale,
         trip_class: mapTravelClass(travelClass),
         passengers: { adults, children: children || 0, infants: infants || 0 },
-        directions: directions,
+        directions: directionsForApi,
       },
     };
 
     const initResponse = await fetch('https://api.travelpayouts.com/v1/flight_search', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Access-Token': apiToken },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(searchBody),
     });
 
