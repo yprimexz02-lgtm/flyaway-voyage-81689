@@ -95,7 +95,7 @@ serve(async (req) => {
       console.error("Failed to initiate search:", initData);
       const errorMessage = initData.message || JSON.stringify(initData);
       return new Response(JSON.stringify({ error: `API Error (${initResponse.status}): ${errorMessage}` }), {
-        status: initResponse.status,
+        status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
@@ -104,7 +104,7 @@ serve(async (req) => {
       console.error("API did not return a search UUID. Response:", initData);
       const errorMessage = initData.message || JSON.stringify(initData);
       return new Response(JSON.stringify({ error: `Failed to start search: ${errorMessage}` }), {
-        status: 400,
+        status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
@@ -169,7 +169,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in search-flights-travelpayouts function:', error);
     return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
+      status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   }
