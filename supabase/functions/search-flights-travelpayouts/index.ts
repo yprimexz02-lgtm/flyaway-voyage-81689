@@ -89,16 +89,16 @@ serve(async (req) => {
       body: JSON.stringify(searchBody),
     });
 
-    const initData = await initResponse.json();
-
     if (!initResponse.ok) {
-      console.error("Failed to initiate search:", initData);
-      const errorMessage = initData.message || JSON.stringify(initData);
-      return new Response(JSON.stringify({ error: `API Error (${initResponse.status}): ${errorMessage}` }), {
+      const errorText = await initResponse.text();
+      console.error("Failed to initiate search:", errorText);
+      return new Response(JSON.stringify({ error: `API Error (${initResponse.status}): ${errorText}` }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
+
+    const initData = await initResponse.json();
 
     if (!initData.uuid) {
       console.error("API did not return a search UUID. Response:", initData);
