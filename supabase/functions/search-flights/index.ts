@@ -17,6 +17,7 @@ interface FlightSearchRequest {
   max?: number;
 }
 
+// Redeploying to fetch updated secrets
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
