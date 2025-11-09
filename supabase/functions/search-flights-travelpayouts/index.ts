@@ -35,19 +35,19 @@ serve(async (req) => {
   }
 
   try {
-    console.log('Function invoked. Checking secrets...');
-    const apiToken = Deno.env.get('TRAVELPAYOUTS_API_TOKEN');
-    const marker = Deno.env.get('TRAVELPAYOUTS_MARKER');
-    
-    console.log(`API Token loaded: ${apiToken ? 'Yes' : 'No'}`);
-    console.log(`Marker loaded: ${marker ? 'Yes' : 'No'}`);
+    // --- TEMPORARY DEBUGGING VALUES ---
+    const apiToken = "ba5cc6677e8da630f1037255e9b65f09";
+    const marker = "683132";
+    const userIp = "8.8.8.8"; // Using a static public IP for testing
+    // --- END OF TEMPORARY VALUES ---
+
+    console.log('Function invoked with hardcoded credentials for testing.');
 
     if (!apiToken || !marker) {
-      throw new Error('Travelpayouts API token or marker not configured in Supabase secrets.');
+      throw new Error('Hardcoded credentials are not set.');
     }
 
     const { origin, destination, departureDate, returnDate, adults, children, infants, travelClass } = await req.json();
-    const userIp = req.headers.get("x-forwarded-for")?.split(',')[0].trim() || "127.0.0.1";
 
     const directionsForApi = [{ origin: origin.toUpperCase(), destination: destination.toUpperCase(), date: departureDate }];
     if (returnDate) {
