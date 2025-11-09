@@ -44,13 +44,6 @@ const FlightCard = ({ flight, carriers }: FlightCardProps) => {
     return `${hours}h ${minutes}m`;
   };
 
-  const estimatePriceInBRL = (price: string, currency: string) => {
-    // Using a more current rate for estimation, but the original price in EUR is the source of truth.
-    const eurToBrl = 5.85; 
-    const priceInBrl = currency === "EUR" ? parseFloat(price) * eurToBrl : parseFloat(price);
-    return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(priceInBrl);
-  };
-
   const getLayoverDuration = (arrival: string, departure: string) => {
     const arrivalTime = new Date(arrival).getTime();
     const departureTime = new Date(departure).getTime();
@@ -59,6 +52,13 @@ const FlightCard = ({ flight, carriers }: FlightCardProps) => {
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     return `${hours}h ${minutes}m`;
   };
+
+  const eurToBrl = 5.85;
+  const airlinePriceInBRL = flight.price.currency === "EUR" 
+    ? parseFloat(flight.price.total) * eurToBrl 
+    : parseFloat(flight.price.total);
+  
+  const gfcTravelPrice = airlinePriceInBRL * 0.88; // 12% discount
 
   return (
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-premium hover:border-primary/50 border-2 border-transparent">
@@ -133,11 +133,11 @@ const FlightCard = ({ flight, carriers }: FlightCardProps) => {
         <div className="bg-muted/30 lg:w-64 flex flex-col justify-center items-center p-6 border-t lg:border-t-0 lg:border-l border-border">
           <p className="text-sm text-muted-foreground">Preço total GFC Travel</p>
           <p className="text-3xl font-extrabold text-gradient mb-2">
-            {estimatePriceInBRL(flight.price.total, flight.price.currency)}
+            {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(gfcTravelPrice)}
           </p>
           <p className="text-sm text-muted-foreground">Preço pela companhia</p>
           <p className="text-lg font-semibold text-foreground mb-4">
-            {new Intl.NumberFormat("de-DE", { style: "currency", currency: flight.price.currency }).format(parseFloat(flight.price.total))}
+            {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(airlinePriceInBRL)}
           </p>
           <Button size="lg" className="w-full bg-gradient-to-r from-primary to-secondary hover:shadow-glow">
             Selecionar Voo
