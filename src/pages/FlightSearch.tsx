@@ -63,44 +63,60 @@ const FlightSearch = () => {
       returnDate: searchParams.get("returnDate") || undefined,
       adults: parseInt(searchParams.get("adults") || "1"),
       travelClass: searchParams.get("travelClass") || "ECONOMY",
-      max: 10,
+      max: 5, // Request 5 from each source
     };
 
-    const { data, error } = await supabase.functions.invoke("search-flights", {
-      body: searchData,
-    });
+    // Invoke both functions in parallel
+    const amadeusPromise = supabase.functions.invoke("search-flights", { body: searchData });
+    const travelpayoutsPromise = supabase.functions.invoke("search-flights-travelpayouts", { body: searchData });
 
+    const results = await Promise.allSettled([amadeusPromise, travelpayoutsPromise]);
+    
     setLoading(false);
 
-    if (error) {
-      console.error("Error invoking Supabase function:", error);
-      toast({
-        title: "Erro de comunicação com o servidor",
-        description: error.message,
-        variant: "destructive",
-      });
-      return;
+    let allFlights: FlightOffer[] = [];
+    let allDictionaries: any = { carriers: {} };
+    let hasErrors = false;
+
+    // Process Amadeus results
+    const amadeusResult = results[0];
+    if (amadeusResult.status === 'fulfilled' && !amadeusResult.value.data.error) {
+      allFlights.push(...(amadeusResult.value.data.data || []));
+      Object.assign(allDictionaries.carriers, amadeusResult.value.data.dictionaries?.carriers || {});
+    } else {
+      console.error("Amadeus API Error:", amadeusResult.status === 'fulfilled' ? amadeusResult.value.data.error : amadeusResult.reason);
+      hasErrors = true;
     }
 
-    if (data && data.error) {
-      console.error("Error from flight search function:", data.error);
-      toast({
-        title: "Erro na busca de voos",
-        description: `O servidor retornou: ${data.error}`,
-        variant: "destructive",
-      });
-      return;
+    // Process Travelpayouts results
+    const travelpayoutsResult = results[1];
+    if (travelpayoutsResult.status === 'fulfilled' && !travelpayoutsResult.value.data.error) {
+      allFlights.push(...(travelpayoutsResult.value.data.data || []));
+      Object.assign(allDictionaries.carriers, travelpayoutsResult.value.data.dictionaries?.carriers || {});
+    } else {
+      console.error("Travelpayouts API Error:", travelpayoutsResult.status === 'fulfilled' ? travelpayoutsResult.value.data.error : travelpayoutsResult.reason);
+      hasErrors = true;
     }
 
-    if (data?.data && data.data.length > 0) {
-      setFlights(data.data);
-      setDictionaries(data.dictionaries || {});
+    // Sort all flights by price
+    allFlights.sort((a, b) => parseFloat(a.price.total) - parseFloat(b.price.total));
+
+    setFlights(allFlights);
+    setDictionaries(allDictionaries);
+
+    if (allFlights.length > 0) {
       toast({
         title: "Voos encontrados!",
-        description: `Encontramos ${data.data.length} opções para você.`,
+        description: `Encontramos ${allFlights.length} opções para você.`,
       });
+      if (hasErrors) {
+        toast({
+          title: "Aviso",
+          description: "Alguns dos nossos provedores de voos não responderam. A lista pode estar incompleta.",
+          variant: "destructive",
+        });
+      }
     } else {
-      setFlights([]);
       toast({
         title: "Nenhum voo encontrado",
         description: "Tente ajustar seus critérios de busca.",
@@ -132,7 +148,7 @@ const FlightSearch = () => {
           {loading && (
             <div className="flex flex-col items-center justify-center py-20">
               <Loader2 className="w-12 h-12 animate-spin text-primary mb-4" />
-              <p className="text-muted-foreground">Buscando os melhores voos para você...</p>
+              <p className="text-muted-foreground">Buscando nas melhores fontes para você...</p>
             </div>
           )}
 
