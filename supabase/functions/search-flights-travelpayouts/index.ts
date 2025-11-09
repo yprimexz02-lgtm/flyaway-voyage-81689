@@ -35,6 +35,9 @@ serve(async (req) => {
     const { origin, destination, departureDate, returnDate, adults, children, infants, travelClass } = await req.json();
     const apiToken = Deno.env.get('TRAVELPAYOUTS_API_TOKEN');
     const marker = Deno.env.get('TRAVELPAYOUTS_MARKER');
+    
+    // Get user IP from request headers for API compliance
+    const userIp = req.headers.get("x-forwarded-for")?.split(',')[0].trim() || "127.0.0.1";
 
     if (!apiToken || !marker) {
       throw new Error('Travelpayouts API token or marker not configured');
@@ -56,6 +59,7 @@ serve(async (req) => {
 
     const searchBody = {
       marker: marker,
+      user_ip: userIp,
       search_params: {
         trip_class: mapTravelClass(travelClass),
         passengers: {
