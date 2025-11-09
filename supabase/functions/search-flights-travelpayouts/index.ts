@@ -53,16 +53,18 @@ serve(async (req) => {
       `${formatDateForSignature(d.date)}${d.origin}${d.destination}`
     ).join(',');
 
-    // Corrected signature generation order and components
+    const passengersString = `${adults}:${children || 0}:${infants || 0}`;
+    const locale = 'pt';
+
+    // Corrected signature generation according to documentation: MD5(TOKEN:MARKER:USER_IP:LOCALE:TRIP_CLASS:PASSENGERS:SEGMENTS)
     const signatureString = [
       apiToken,
       marker,
-      adults,
-      children || 0,
-      infants || 0,
-      directionsStringForSignature,
-      mapTravelClass(travelClass),
       userIp,
+      locale,
+      mapTravelClass(travelClass),
+      passengersString,
+      directionsStringForSignature,
     ].join(':');
 
     const signature = md5(signatureString);
@@ -72,7 +74,7 @@ serve(async (req) => {
       marker: marker,
       user_ip: userIp,
       search_params: {
-        locale: 'pt',
+        locale: locale,
         trip_class: mapTravelClass(travelClass),
         passengers: { adults, children: children || 0, infants: infants || 0 },
         directions: directionsForApi,
