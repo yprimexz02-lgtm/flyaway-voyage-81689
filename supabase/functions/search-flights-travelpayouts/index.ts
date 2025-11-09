@@ -55,6 +55,7 @@ serve(async (req) => {
     }
 
     const searchBody = {
+      marker: marker,
       search_params: {
         trip_class: mapTravelClass(travelClass),
         passengers: {
