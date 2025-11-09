@@ -61,7 +61,6 @@ serve(async (req) => {
       marker: marker,
       user_ip: userIp,
       search_params: {
-        host: "gfchavestravelexperience.com",
         trip_class: mapTravelClass(travelClass),
         passengers: {
           adults: adults,
