@@ -49,21 +49,20 @@ serve(async (req) => {
       directionsForApi.push({ origin: destination.toUpperCase(), destination: origin.toUpperCase(), date: returnDate });
     }
 
-    const locale = 'pt';
     const directionsStringForSignature = directionsForApi.map(d => 
       `${formatDateForSignature(d.date)}${d.origin}${d.destination}`
     ).join(',');
 
+    // Corrected signature generation order and components
     const signatureString = [
       apiToken,
       marker,
-      userIp,
-      locale,
-      mapTravelClass(travelClass),
       adults,
       children || 0,
       infants || 0,
-      directionsStringForSignature
+      directionsStringForSignature,
+      mapTravelClass(travelClass),
+      userIp,
     ].join(':');
 
     const signature = md5(signatureString);
@@ -73,7 +72,7 @@ serve(async (req) => {
       marker: marker,
       user_ip: userIp,
       search_params: {
-        locale: locale,
+        locale: 'pt',
         trip_class: mapTravelClass(travelClass),
         passengers: { adults, children: children || 0, infants: infants || 0 },
         directions: directionsForApi,
