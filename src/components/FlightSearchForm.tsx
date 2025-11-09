@@ -85,6 +85,8 @@ const FlightSearchForm = ({ variant = "page" }: FlightSearchFormProps) => {
     departureDate: "",
     returnDate: "",
     adults: "1",
+    children: "0",
+    infants: "0",
     travelClass: "ECONOMY",
     tripType: "roundtrip",
   });
@@ -165,6 +167,8 @@ const FlightSearchForm = ({ variant = "page" }: FlightSearchFormProps) => {
         departureDate: format(departureDate, "yyyy-MM-dd"),
         ...(formData.tripType === "roundtrip" && returnDate ? { returnDate: format(returnDate, "yyyy-MM-dd") } : {}),
         adults: formData.adults,
+        children: formData.children,
+        infants: formData.infants,
         travelClass: formData.travelClass,
       });
       navigate(`/buscar-voos?${params.toString()}`);
@@ -216,7 +220,7 @@ const FlightSearchForm = ({ variant = "page" }: FlightSearchFormProps) => {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
         {/* Origem */}
         <div className="space-y-2" ref={originRef}>
           <Label htmlFor="origin" className="text-sm font-medium">Origem</Label>
@@ -233,7 +237,6 @@ const FlightSearchForm = ({ variant = "page" }: FlightSearchFormProps) => {
               onChange={(e) => {
                 setOriginSearch(e.target.value);
                 setShowOriginSuggestions(true);
-                // Clear the selected origin if user types again
                 if (formData.origin) {
                   setFormData({ ...formData, origin: "" });
                 }
@@ -276,7 +279,6 @@ const FlightSearchForm = ({ variant = "page" }: FlightSearchFormProps) => {
               onChange={(e) => {
                 setDestinationSearch(e.target.value);
                 setShowDestinationSuggestions(true);
-                // Clear the selected destination if user types again
                 if (formData.destination) {
                   setFormData({ ...formData, destination: "" });
                 }
@@ -316,7 +318,7 @@ const FlightSearchForm = ({ variant = "page" }: FlightSearchFormProps) => {
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {departureDate ? format(departureDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) : "Selecione a data"}
+                {departureDate ? format(departureDate, "dd 'de' MMMM", { locale: ptBR }) : "Selecione"}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0 bg-popover" align="start">
@@ -334,49 +336,72 @@ const FlightSearchForm = ({ variant = "page" }: FlightSearchFormProps) => {
         </div>
 
         {/* Data Volta */}
-        {formData.tripType === "roundtrip" && (
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Data de Volta</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !returnDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {returnDate ? format(returnDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) : "Selecione a data"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-popover" align="start">
-                <Calendar
-                  mode="single"
-                  selected={returnDate}
-                  onSelect={setReturnDate}
-                  disabled={(date) => date < (departureDate || new Date())}
-                  initialFocus
-                  className="pointer-events-auto"
-                  locale={ptBR}
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-        )}
-
-        {/* Passageiros */}
         <div className="space-y-2">
-          <Label htmlFor="adults" className="text-sm font-medium">Passageiros</Label>
+          <Label className="text-sm font-medium">Data de Volta</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                disabled={formData.tripType === 'oneway'}
+                className={cn(
+                  "w-full justify-start text-left font-normal",
+                  !returnDate && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {returnDate ? format(returnDate, "dd 'de' MMMM", { locale: ptBR }) : "Selecione"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0 bg-popover" align="start">
+              <Calendar
+                mode="single"
+                selected={returnDate}
+                onSelect={setReturnDate}
+                disabled={(date) => date < (departureDate || new Date())}
+                initialFocus
+                className="pointer-events-auto"
+                locale={ptBR}
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        {/* Adultos */}
+        <div className="space-y-2">
+          <Label htmlFor="adults" className="text-sm font-medium">Adultos</Label>
           <Select value={formData.adults} onValueChange={(value) => setFormData({ ...formData, adults: value })}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
+            <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               {[1, 2, 3, 4, 5, 6].map((num) => (
-                <SelectItem key={num} value={num.toString()}>
-                  {num} {num === 1 ? "adulto" : "adultos"}
-                </SelectItem>
+                <SelectItem key={num} value={num.toString()}>{num} {num === 1 ? "adulto" : "adultos"}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Crianças */}
+        <div className="space-y-2">
+          <Label htmlFor="children" className="text-sm font-medium">Crianças (2-11)</Label>
+          <Select value={formData.children} onValueChange={(value) => setFormData({ ...formData, children: value })}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {[0, 1, 2, 3, 4, 5, 6].map((num) => (
+                <SelectItem key={num} value={num.toString()}>{num} {num === 1 ? "criança" : "crianças"}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Bebês */}
+        <div className="space-y-2">
+          <Label htmlFor="infants" className="text-sm font-medium">Bebês (&lt;2)</Label>
+          <Select value={formData.infants} onValueChange={(value) => setFormData({ ...formData, infants: value })}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {[0, 1, 2, 3, 4, 5, 6].map((num) => (
+                <SelectItem key={num} value={num.toString()}>{num} {num === 1 ? "bebê" : "bebês"}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -386,9 +411,7 @@ const FlightSearchForm = ({ variant = "page" }: FlightSearchFormProps) => {
         <div className="space-y-2">
           <Label htmlFor="class" className="text-sm font-medium">Classe</Label>
           <Select value={formData.travelClass} onValueChange={(value) => setFormData({ ...formData, travelClass: value })}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
+            <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="ECONOMY">Econômica</SelectItem>
               <SelectItem value="PREMIUM_ECONOMY">Econômica Premium</SelectItem>
@@ -403,7 +426,7 @@ const FlightSearchForm = ({ variant = "page" }: FlightSearchFormProps) => {
         type="submit" 
         size="lg"
         disabled={isSearching}
-        className={`w-full transition-all duration-300 ${isHero ? "bg-gradient-to-r from-primary to-secondary hover:shadow-glow text-lg h-16 rounded-2xl font-semibold" : "bg-gradient-to-r from-primary to-secondary hover:shadow-glow"}`}
+        className={`w-full transition-all duration-300 mt-4 ${isHero ? "bg-gradient-to-r from-primary to-secondary hover:shadow-glow text-lg h-16 rounded-2xl font-semibold" : "bg-gradient-to-r from-primary to-secondary hover:shadow-glow"}`}
       >
         <Search className="w-5 h-5 mr-2" />
         {isSearching ? "Buscando..." : "Buscar Voos"}

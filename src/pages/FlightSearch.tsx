@@ -62,6 +62,8 @@ const FlightSearch = () => {
       departureDate: searchParams.get("departureDate") || "",
       returnDate: searchParams.get("returnDate") || undefined,
       adults: parseInt(searchParams.get("adults") || "1"),
+      children: parseInt(searchParams.get("children") || "0"),
+      infants: parseInt(searchParams.get("infants") || "0"),
       travelClass: searchParams.get("travelClass") || "ECONOMY",
       max: 10,
     };

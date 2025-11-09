@@ -32,7 +32,7 @@ serve(async (req) => {
   }
 
   try {
-    const { origin, destination, departureDate, returnDate, adults, travelClass } = await req.json();
+    const { origin, destination, departureDate, returnDate, adults, children, infants, travelClass } = await req.json();
     const apiToken = Deno.env.get('TRAVELPAYOUTS_API_TOKEN');
     const marker = Deno.env.get('TRAVELPAYOUTS_MARKER');
 
@@ -59,8 +59,8 @@ serve(async (req) => {
         trip_class: mapTravelClass(travelClass),
         passengers: {
           adults: adults,
-          children: 0, // Our form doesn't support this yet
-          infants: 0,  // Our form doesn't support this yet
+          children: children || 0,
+          infants: infants || 0,
         },
         directions: directions,
       },
