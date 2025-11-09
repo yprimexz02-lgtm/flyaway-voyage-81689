@@ -55,7 +55,6 @@ serve(async (req) => {
     }
 
     const searchBody = {
-      host: "gfchavestravelexperience.com",
       marker: marker,
       search_params: {
         trip_class: mapTravelClass(travelClass),
