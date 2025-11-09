@@ -32,9 +32,13 @@ serve(async (req) => {
     const clientId = Deno.env.get('AMADEUS_CLIENT_ID');
     const clientSecret = Deno.env.get('AMADEUS_CLIENT_SECRET');
 
-    if (!clientId || !clientSecret) {
-      console.error('Missing Amadeus credentials');
-      throw new Error('Amadeus API credentials not configured');
+    if (!clientId) {
+      console.error('Missing Amadeus credential: AMADEUS_CLIENT_ID');
+      throw new Error('Amadeus Client ID not configured');
+    }
+    if (!clientSecret) {
+      console.error('Missing Amadeus credential: AMADEUS_CLIENT_SECRET');
+      throw new Error('Amadeus Client Secret not configured');
     }
 
     // Get access token from Amadeus
