@@ -69,10 +69,21 @@ const FlightSearch = () => {
     };
 
     try {
-      const { data, error } = await supabase.functions.invoke("search-flights-travelpayouts", { body: searchData });
+      const { data, error: invokeError } = await supabase.functions.invoke("search-flights-travelpayouts", { body: searchData });
 
-      if (error || data.error) {
-        throw new Error(error?.message || data.error);
+      if (invokeError) {
+        throw invokeError;
+      }
+
+      if (data && data.error) {
+        console.error("API Error from function:", data.error);
+        toast({
+          title: "Erro ao buscar voos",
+          description: `A API retornou um erro: ${data.error}`,
+          variant: "destructive",
+        });
+        setFlights([]);
+        return;
       }
 
       const flightResults: FlightOffer[] = data.data || [];
@@ -95,11 +106,11 @@ const FlightSearch = () => {
           variant: "destructive",
         });
       }
-    } catch (err) {
-      console.error("Travelpayouts API Error:", err);
+    } catch (err: any) {
+      console.error("Travelpayouts search failed:", err);
       toast({
-        title: "Erro na busca",
-        description: "Não foi possível buscar os voos. Por favor, tente novamente mais tarde.",
+        title: "Erro Crítico na Busca",
+        description: err.message || "Não foi possível buscar os voos. Por favor, tente novamente.",
         variant: "destructive",
       });
     } finally {

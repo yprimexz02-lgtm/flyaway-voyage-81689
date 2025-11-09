@@ -5,20 +5,17 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Helper to map our class names to Travelpayouts' single-letter codes
 const mapTravelClass = (travelClass: string) => {
   switch (travelClass) {
     case 'BUSINESS': return 'C';
     case 'FIRST': return 'F';
     case 'PREMIUM_ECONOMY': return 'W';
-    default: return 'Y'; // Economy
+    default: return 'Y';
   }
 };
 
-// Helper to introduce a delay, necessary for polling the API
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
-// Helper to convert duration from minutes to ISO 8601 format (e.g., PT2H30M)
 const formatDurationFromMinutes = (minutes: number) => {
   if (!minutes || minutes <= 0) return 'PT0M';
   const h = Math.floor(minutes / 60);
@@ -35,26 +32,15 @@ serve(async (req) => {
     const { origin, destination, departureDate, returnDate, adults, children, infants, travelClass } = await req.json();
     const apiToken = Deno.env.get('TRAVELPAYOUTS_API_TOKEN');
     const marker = Deno.env.get('TRAVELPAYOUTS_MARKER');
-    
-    // Get user IP from request headers for API compliance
     const userIp = req.headers.get("x-forwarded-for")?.split(',')[0].trim() || "127.0.0.1";
 
     if (!apiToken || !marker) {
       throw new Error('Travelpayouts API token or marker not configured');
     }
 
-    const directions = [{
-      origin: origin.toUpperCase(),
-      destination: destination.toUpperCase(),
-      date: departureDate,
-    }];
-
+    const directions = [{ origin: origin.toUpperCase(), destination: destination.toUpperCase(), date: departureDate }];
     if (returnDate) {
-      directions.push({
-        origin: destination.toUpperCase(),
-        destination: origin.toUpperCase(),
-        date: returnDate,
-      });
+      directions.push({ origin: destination.toUpperCase(), destination: origin.toUpperCase(), date: returnDate });
     }
 
     const searchBody = {
@@ -62,16 +48,11 @@ serve(async (req) => {
       user_ip: userIp,
       search_params: {
         trip_class: mapTravelClass(travelClass),
-        passengers: {
-          adults: adults,
-          children: children || 0,
-          infants: infants || 0,
-        },
+        passengers: { adults, children: children || 0, infants: infants || 0 },
         directions: directions,
       },
     };
 
-    // Step 1: Initiate the search and get a search ID (UUID)
     const initResponse = await fetch('https://api.travelpayouts.com/v1/flight_search', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-Access-Token': apiToken },
@@ -81,13 +62,15 @@ serve(async (req) => {
     if (!initResponse.ok) {
       const errorText = await initResponse.text();
       console.error("Failed to initiate search:", errorText);
-      throw new Error(`Failed to initiate search: ${errorText}`);
+      return new Response(JSON.stringify({ error: `API Error (${initResponse.status}): ${errorText}` }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
     const { uuid } = await initResponse.json();
 
-    // Step 2: Poll for results until the search is complete
     let allResults: any[] = [];
-    for (let i = 0; i < 30; i++) { // Poll for up to 90 seconds
+    for (let i = 0; i < 30; i++) {
       await delay(3000);
       const resultsResponse = await fetch(`https://api.travelpayouts.com/v1/flight_search_results?uuid=${uuid}`, {
         headers: { 'X-Access-Token': apiToken },
@@ -97,9 +80,7 @@ serve(async (req) => {
         const data = await resultsResponse.json();
         if (data && Array.isArray(data) && data.length > 0) {
           allResults.push(...data);
-          if (data.some(item => item.search_completed === true)) {
-            break;
-          }
+          if (data.some(item => item.search_completed === true)) break;
         }
       } else {
         console.warn(`Polling failed with status ${resultsResponse.status}`);
@@ -108,27 +89,20 @@ serve(async (req) => {
     }
 
     const finalResults = allResults.filter(item => !item.search_completed);
-
     if (finalResults.length === 0) {
       return new Response(JSON.stringify({ data: [], dictionaries: {} }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    // Step 3: Transform Travelpayouts data to match our standard Amadeus structure
     const carriers: Record<string, string> = {};
-    const RUB_TO_EUR_RATE = 0.01; // Approximate conversion rate
+    const RUB_TO_EUR_RATE = 0.01;
 
     const transformedData = finalResults.map((flight: any, index: number) => {
       if (!flight.proposals || !flight.price) return null;
-
       const itineraries = flight.proposals.map((proposal: any) => {
         if (!proposal.segment) return null;
-        
         proposal.segment.forEach((s: any) => {
-          if (s?.flight?.carrier && s?.flight?.carrier_name) {
-            carriers[s.flight.carrier] = s.flight.carrier_name;
-          }
+          if (s?.flight?.carrier && s?.flight?.carrier_name) carriers[s.flight.carrier] = s.flight.carrier_name;
         });
-
         return {
           duration: formatDurationFromMinutes(proposal.total_duration_minutes),
           segments: proposal.segment.map((segment: any) => ({
@@ -140,15 +114,10 @@ serve(async (req) => {
           })),
         };
       }).filter(Boolean);
-
       if (itineraries.length === 0) return null;
-
       return {
         id: `tp-${uuid}-${index}`,
-        price: {
-          total: (flight.price * RUB_TO_EUR_RATE).toFixed(2),
-          currency: 'EUR',
-        },
+        price: { total: (flight.price * RUB_TO_EUR_RATE).toFixed(2), currency: 'EUR' },
         itineraries,
       };
     }).filter(Boolean);
@@ -157,6 +126,9 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in search-flights-travelpayouts function:', error);
-    return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
   }
 });
