@@ -47,7 +47,7 @@ serve(async (req) => {
 
     // Get access token from Amadeus
     console.log('Requesting Amadeus access token');
-    const tokenResponse = await fetch('https://test.api.amadeus.com/v1/security/oauth2/token', {
+    const tokenResponse = await fetch('https://api.amadeus.com/v1/security/oauth2/token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -94,7 +94,7 @@ serve(async (req) => {
 
     // Search flights
     const flightResponse = await fetch(
-      `https://test.api.amadeus.com/v2/shopping/flight-offers?${queryParams}`,
+      `https://api.amadeus.com/v2/shopping/flight-offers?${queryParams}`,
       {
         headers: {
           'Authorization': `Bearer ${access_token}`,
