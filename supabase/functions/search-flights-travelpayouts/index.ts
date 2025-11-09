@@ -55,6 +55,7 @@ serve(async (req) => {
     }
 
     const searchBody = {
+      host: "gfchavestravelexperience.com",
       marker: marker,
       search_params: {
         trip_class: mapTravelClass(travelClass),
@@ -79,8 +80,8 @@ serve(async (req) => {
 
     // Step 2: Poll for results a few times
     let results = null;
-    for (let i = 0; i < 5; i++) { // Poll up to 5 times
-      await delay(2000); // Wait 2 seconds between polls
+    for (let i = 0; i < 10; i++) { // Poll up to 10 times (30 seconds total)
+      await delay(3000); // Wait 3 seconds between polls
       const resultsResponse = await fetch(`https://api.travelpayouts.com/v1/flight_search_results?uuid=${uuid}`, {
         headers: { 'X-Access-Token': apiToken },
       });
