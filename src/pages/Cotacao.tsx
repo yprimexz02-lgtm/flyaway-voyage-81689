@@ -149,7 +149,7 @@ const Cotacao = () => {
         pessoas: data.quantidade_pessoas,
       };
 
-      const response = await fetch("https://yprimexz.app.n8n.cloud/webhook/cotacao-viagem", {
+      const response = await fetch("https://yprimexz.app.n8n.cloud/webhook-test/cotacao-viagem", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
