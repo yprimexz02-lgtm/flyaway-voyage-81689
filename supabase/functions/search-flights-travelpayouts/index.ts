@@ -41,15 +41,15 @@ serve(async (req) => {
     }
 
     const directions = [{
-      origin: origin,
-      destination: destination,
+      origin: origin.toUpperCase(),
+      destination: destination.toUpperCase(),
       date: departureDate,
     }];
 
     if (returnDate) {
       directions.push({
-        origin: destination,
-        destination: origin,
+        origin: destination.toUpperCase(),
+        destination: origin.toUpperCase(),
         date: returnDate,
       });
     }
