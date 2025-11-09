@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Md5 } from "https://deno.land/std@0.190.0/hash/md5.ts";
+import md5 from "https://esm.sh/md5";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -67,8 +67,7 @@ serve(async (req) => {
       directionsStringForSignature
     ].join(':');
 
-    const md5 = new Md5();
-    const signature = md5.update(signatureString).toString();
+    const signature = md5(signatureString);
     // --- End of Signature Generation ---
 
     const searchBody = {
