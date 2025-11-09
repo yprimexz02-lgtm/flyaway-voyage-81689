@@ -75,27 +75,40 @@ serve(async (req) => {
       body: JSON.stringify(searchBody),
     });
 
-    if (!initResponse.ok) throw new Error(`Failed to initiate search: ${await initResponse.text()}`);
+    if (!initResponse.ok) {
+      const errorText = await initResponse.text();
+      console.error("Failed to initiate search:", errorText);
+      throw new Error(`Failed to initiate search: ${errorText}`);
+    }
     const { uuid } = await initResponse.json();
 
-    // Step 2: Poll for results a few times
-    let results = null;
-    for (let i = 0; i < 10; i++) { // Poll up to 10 times (30 seconds total)
-      await delay(3000); // Wait 3 seconds between polls
+    // Step 2: Poll for results until the search is complete
+    let allResults: any[] = [];
+    let isSearchComplete = false;
+    for (let i = 0; i < 30; i++) { // Poll for up to 90 seconds
+      await delay(3000);
       const resultsResponse = await fetch(`https://api.travelpayouts.com/v1/flight_search_results?uuid=${uuid}`, {
         headers: { 'X-Access-Token': apiToken },
       });
-      
+
       if (resultsResponse.ok) {
         const data = await resultsResponse.json();
-        if (data && data.length > 0) {
-          results = data;
-          break;
+        if (data && Array.isArray(data) && data.length > 0) {
+          allResults.push(...data);
+          if (data.some(item => item.search_completed === true)) {
+            isSearchComplete = true;
+            break;
+          }
         }
+      } else {
+        console.warn(`Polling failed with status ${resultsResponse.status}`);
+        break;
       }
     }
 
-    if (!results) {
+    const finalResults = allResults.filter(item => !item.search_completed);
+
+    if (finalResults.length === 0) {
       return new Response(JSON.stringify({ data: [], dictionaries: {} }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
@@ -103,7 +116,7 @@ serve(async (req) => {
     const carriers: Record<string, string> = {};
     const RUB_TO_EUR_RATE = 0.01; // Approximate conversion rate
 
-    const transformedData = results.map((flight: any, index: number) => {
+    const transformedData = finalResults.map((flight: any, index: number) => {
       const itineraries = flight.proposals.map((proposal: any) => {
         proposal.segment.forEach((s: any) => {
           carriers[s.flight.carrier] = s.flight.carrier_name;
