@@ -44,8 +44,9 @@ const FlightCard = ({ flight, carriers }: FlightCardProps) => {
     return `${hours}h ${minutes}m`;
   };
 
-  const formatPrice = (price: string, currency: string) => {
-    const eurToBrl = 5.65;
+  const estimatePriceInBRL = (price: string, currency: string) => {
+    // Using a more current rate for estimation, but the original price in EUR is the source of truth.
+    const eurToBrl = 5.85; 
     const priceInBrl = currency === "EUR" ? parseFloat(price) * eurToBrl : parseFloat(price);
     return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(priceInBrl);
   };
@@ -131,11 +132,14 @@ const FlightCard = ({ flight, carriers }: FlightCardProps) => {
         {/* Price and CTA Section */}
         <div className="bg-muted/30 lg:w-64 flex flex-col justify-center items-center p-6 border-t lg:border-t-0 lg:border-l border-border">
           <p className="text-sm text-muted-foreground">Preço total</p>
-          <p className="text-4xl font-extrabold text-gradient mb-4">
-            {formatPrice(flight.price.total, flight.price.currency)}
+          <p className="text-3xl font-extrabold text-foreground mb-1">
+            {new Intl.NumberFormat("de-DE", { style: "currency", currency: flight.price.currency }).format(parseFloat(flight.price.total))}
           </p>
-          <p className="text-xs text-muted-foreground mb-4">
-            Taxas inclusas
+          <p className="text-lg text-gradient font-bold mb-4">
+            ~ {estimatePriceInBRL(flight.price.total, flight.price.currency)}
+          </p>
+          <p className="text-xs text-muted-foreground text-center mb-4">
+            Taxas inclusas. Valor em BRL é uma estimativa.
           </p>
           <Button size="lg" className="w-full bg-gradient-to-r from-primary to-secondary hover:shadow-glow">
             Selecionar Voo
