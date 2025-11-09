@@ -54,49 +54,58 @@ const FlightSearch = () => {
     setLoading(true);
     setFlights([]);
 
-    try {
-      const searchData = {
-        origin: searchParams.get("origin") || "",
-        destination: searchParams.get("destination") || "",
-        departureDate: searchParams.get("departureDate") || "",
-        returnDate: searchParams.get("returnDate") || undefined,
-        adults: parseInt(searchParams.get("adults") || "1"),
-        travelClass: searchParams.get("travelClass") || "ECONOMY",
-        max: 10,
-      };
+    const searchData = {
+      origin: searchParams.get("origin") || "",
+      destination: searchParams.get("destination") || "",
+      departureDate: searchParams.get("departureDate") || "",
+      returnDate: searchParams.get("returnDate") || undefined,
+      adults: parseInt(searchParams.get("adults") || "1"),
+      travelClass: searchParams.get("travelClass") || "ECONOMY",
+      max: 10,
+    };
 
-      console.log("Searching flights with:", searchData);
+    console.log("Searching flights with:", searchData);
 
-      const { data, error } = await supabase.functions.invoke("search-flights", {
-        body: searchData,
-      });
+    const { data, error } = await supabase.functions.invoke("search-flights", {
+      body: searchData,
+    });
 
-      if (error) throw error;
+    setLoading(false);
 
-      console.log("Flight search response:", data);
-
-      if (data?.data) {
-        setFlights(data.data);
-        toast({
-          title: "Voos encontrados!",
-          description: `Encontramos ${data.data.length} opções para você.`,
-        });
-      } else {
-        toast({
-          title: "Nenhum voo encontrado",
-          description: "Tente ajustar seus critérios de busca.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error("Error searching flights:", error);
+    if (error) {
+      console.error("Error invoking Supabase function:", error);
       toast({
-        title: "Erro na busca",
-        description: "Não foi possível buscar voos. Tente novamente.",
+        title: "Erro de comunicação com o servidor",
+        description: error.message,
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
+      return;
+    }
+
+    // The function returns { error: 'message' } on failure
+    if (data && data.error) {
+      console.error("Error from flight search function:", data.error);
+      toast({
+        title: "Erro na busca de voos",
+        description: `O servidor retornou: ${data.error}`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (data?.data && data.data.length > 0) {
+      setFlights(data.data);
+      toast({
+        title: "Voos encontrados!",
+        description: `Encontramos ${data.data.length} opções para você.`,
+      });
+    } else {
+      setFlights([]);
+      toast({
+        title: "Nenhum voo encontrado",
+        description: "Tente ajustar seus critérios de busca.",
+        variant: "destructive",
+      });
     }
   };
 
