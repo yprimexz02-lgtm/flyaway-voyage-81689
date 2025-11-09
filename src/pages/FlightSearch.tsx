@@ -3,9 +3,9 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import FlightSearchForm from "@/components/FlightSearchForm";
-import { Card, CardContent } from "@/components/ui/card";
+import FlightCard from "@/components/FlightCard";
 import { Button } from "@/components/ui/button";
-import { Loader2, Plane, Clock, ArrowRight, ArrowLeft } from "lucide-react";
+import { Loader2, Plane, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -37,6 +37,7 @@ const FlightSearch = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [flights, setFlights] = useState<FlightOffer[]>([]);
+  const [dictionaries, setDictionaries] = useState<any>({});
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
@@ -53,6 +54,7 @@ const FlightSearch = () => {
   const searchFlights = async () => {
     setLoading(true);
     setFlights([]);
+    setDictionaries({});
 
     const searchData = {
       origin: searchParams.get("origin") || "",
@@ -63,8 +65,6 @@ const FlightSearch = () => {
       travelClass: searchParams.get("travelClass") || "ECONOMY",
       max: 10,
     };
-
-    console.log("Searching flights with:", searchData);
 
     const { data, error } = await supabase.functions.invoke("search-flights", {
       body: searchData,
@@ -82,7 +82,6 @@ const FlightSearch = () => {
       return;
     }
 
-    // The function returns { error: 'message' } on failure
     if (data && data.error) {
       console.error("Error from flight search function:", data.error);
       toast({
@@ -95,6 +94,7 @@ const FlightSearch = () => {
 
     if (data?.data && data.data.length > 0) {
       setFlights(data.data);
+      setDictionaries(data.dictionaries || {});
       toast({
         title: "Voos encontrados!",
         description: `Encontramos ${data.data.length} opções para você.`,
@@ -107,28 +107,6 @@ const FlightSearch = () => {
         variant: "destructive",
       });
     }
-  };
-
-  const formatTime = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-  };
-
-  const formatDuration = (duration: string) => {
-    const hours = duration.match(/(\d+)H/)?.[1] || "0";
-    const minutes = duration.match(/(\d+)M/)?.[1] || "0";
-    return `${hours}h ${minutes}m`;
-  };
-
-  const formatPrice = (price: string, currency: string) => {
-    // Converter EUR para BRL (taxa aproximada)
-    const eurToBrl = 5.65; // Taxa de câmbio aproximada
-    const priceInBrl = currency === "EUR" ? parseFloat(price) * eurToBrl : parseFloat(price);
-    
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(priceInBrl);
   };
 
   return (
@@ -159,69 +137,17 @@ const FlightSearch = () => {
           )}
 
           {!loading && flights.length > 0 && (
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold mb-6">{flights.length} voos encontrados</h2>
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold">
+                {flights.length} {flights.length === 1 ? "voo encontrado" : "voos encontrados"}
+              </h2>
               
               {flights.map((flight) => (
-                <Card key={flight.id} className="hover:shadow-hover transition-all">
-                  <CardContent className="p-6">
-                    {flight.itineraries.map((itinerary, idx) => (
-                      <div key={idx} className="mb-4 last:mb-0">
-                        {itinerary.segments.map((segment, segIdx) => (
-                          <div key={segIdx} className="mb-4 last:mb-0">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-6 flex-1">
-                                <div className="text-center">
-                                  <p className="text-2xl font-bold">{formatTime(segment.departure.at)}</p>
-                                  <p className="text-sm text-muted-foreground">{segment.departure.iataCode}</p>
-                                </div>
-
-                                <div className="flex-1 flex flex-col items-center">
-                                  <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                                    <Clock className="w-4 h-4" />
-                                    <span className="text-sm">{formatDuration(segment.duration)}</span>
-                                  </div>
-                                  <div className="w-full h-px bg-border relative">
-                                    <Plane className="w-5 h-5 text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-background" />
-                                  </div>
-                                  <p className="text-xs text-muted-foreground mt-1">
-                                    {segment.carrierCode} {segment.number}
-                                  </p>
-                                </div>
-
-                                <div className="text-center">
-                                  <p className="text-2xl font-bold">{formatTime(segment.arrival.at)}</p>
-                                  <p className="text-sm text-muted-foreground">{segment.arrival.iataCode}</p>
-                                </div>
-                              </div>
-
-                              {segIdx === 0 && (
-                                <div className="ml-8 text-right">
-                                  <p className="text-sm text-muted-foreground mb-1">Total</p>
-                                   <p className="text-3xl font-bold text-primary mb-2">
-                                    {formatPrice(flight.price.total, flight.price.currency)}
-                                   </p>
-                                   <p className="text-xs text-muted-foreground">
-                                     Valor original: €{parseFloat(flight.price.total).toFixed(2)}
-                                   </p>
-                                  <Button className="bg-gradient-to-r from-primary to-secondary">
-                                    Reservar Agora
-                                    <ArrowRight className="w-4 h-4 ml-2" />
-                                  </Button>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                        {itinerary.segments.length > 1 && (
-                          <p className="text-sm text-muted-foreground mt-2">
-                            {itinerary.segments.length - 1} {itinerary.segments.length === 2 ? "escala" : "escalas"}
-                          </p>
-                        )}
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
+                <FlightCard 
+                  key={flight.id} 
+                  flight={flight} 
+                  carriers={dictionaries.carriers || {}} 
+                />
               ))}
             </div>
           )}
