@@ -83,6 +83,13 @@ serve(async (req) => {
       },
     };
 
+    console.log('Sending request to Travelpayouts API with:', {
+      url: 'https://api.travelpayouts.com/v1/flight_search',
+      hasToken: !!apiToken,
+      tokenPrefix: apiToken ? apiToken.substring(0, 8) + '...' : 'missing',
+      marker: marker
+    });
+
     const initResponse = await fetch('https://api.travelpayouts.com/v1/flight_search', {
       method: 'POST',
       headers: { 
@@ -95,7 +102,9 @@ serve(async (req) => {
     if (!initResponse.ok) {
       const errorText = await initResponse.text();
       console.error("Failed to initiate search:", errorText);
-      return new Response(JSON.stringify({ error: `API Error (${initResponse.status}): ${errorText}` }), {
+      console.error("Response status:", initResponse.status);
+      console.error("Request body:", JSON.stringify(searchBody, null, 2));
+      return new Response(JSON.stringify({ error: `API Error (${initResponse.status}): ${errorText}. Verifique se suas credenciais Travelpayouts (API Token e Marker) estão corretas.` }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
