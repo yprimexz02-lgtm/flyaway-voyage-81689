@@ -35,16 +35,14 @@ serve(async (req) => {
   }
 
   try {
-    // --- TEMPORARY DEBUGGING VALUES ---
-    const apiToken = "ba5cc6677e8da630f1037255e9b65f09";
-    const marker = "683132";
+    const apiToken = Deno.env.get('TRAVELPAYOUTS_API_TOKEN');
+    const marker = Deno.env.get('TRAVELPAYOUTS_MARKER');
     const userIp = "8.8.8.8"; // Using a static public IP for testing
-    // --- END OF TEMPORARY VALUES ---
 
-    console.log('Function invoked with hardcoded credentials for testing.');
+    console.log('Function invoked with credentials from secrets.');
 
     if (!apiToken || !marker) {
-      throw new Error('Hardcoded credentials are not set.');
+      throw new Error('TRAVELPAYOUTS_API_TOKEN and TRAVELPAYOUTS_MARKER must be configured in secrets.');
     }
 
     const { origin, destination, departureDate, returnDate, adults, children, infants, travelClass } = await req.json();
