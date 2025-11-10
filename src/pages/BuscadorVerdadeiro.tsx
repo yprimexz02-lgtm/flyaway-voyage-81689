@@ -9,6 +9,7 @@ const BuscadorVerdadeiro = () => {
         <div className="container mx-auto px-4">
           <h1 className="text-4xl md:text-5xl font-bold mb-8 text-center">Buscador Verdadeiro</h1>
           <div id="tpwl-search"></div>
+          <div id="tpwl-tickets"></div>
         </div>
       </div>
       <Footer />
