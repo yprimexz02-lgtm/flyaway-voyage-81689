@@ -162,13 +162,9 @@ const BookingForm = () => {
 
   // Calcula o preço final correto com desconto GFC Travel
   const calculateTotalPrice = () => {
-    // API retorna preços base, adicionamos taxa de serviço de 3% para igualar ao Google Flights
-    const outboundBasePrice = parseFloat(flightData.outbound.price.total);
-    const returnBasePrice = flightData.return ? parseFloat(flightData.return.price.total) : 0;
-    
-    // Adiciona taxa de serviço de 3%
-    const outboundPrice = outboundBasePrice * 1.03;
-    const returnPrice = returnBasePrice * 1.03;
+    // API retorna preços já com todas as taxas incluídas
+    const outboundPrice = parseFloat(flightData.outbound.price.total);
+    const returnPrice = flightData.return ? parseFloat(flightData.return.price.total) : 0;
     
     // Soma dos preços sem desconto
     const totalBeforeDiscount = outboundPrice + returnPrice;
@@ -178,10 +174,8 @@ const BookingForm = () => {
     const finalPrice = totalBeforeDiscount - discount;
     
     console.log('📊 Conferência de Preços:', {
-      'Voo de Ida (base API)': `R$ ${outboundBasePrice.toFixed(2)}`,
-      'Voo de Ida (+ taxa 3%)': `R$ ${outboundPrice.toFixed(2)}`,
-      'Voo de Volta (base API)': flightData.return ? `R$ ${returnBasePrice.toFixed(2)}` : 'N/A',
-      'Voo de Volta (+ taxa 3%)': flightData.return ? `R$ ${returnPrice.toFixed(2)}` : 'N/A',
+      'Voo Ida (API)': `R$ ${outboundPrice.toFixed(2)}`,
+      'Voo Volta (API)': `R$ ${returnPrice.toFixed(2)}`,
       'Total CIA (sem desconto)': `R$ ${totalBeforeDiscount.toFixed(2)}`,
       'Desconto GFC (12%)': `R$ ${discount.toFixed(2)}`,
       'Preço Final GFC': `R$ ${finalPrice.toFixed(2)}`
@@ -481,7 +475,7 @@ const BookingForm = () => {
                     {/* Preço Original da CIA */}
                     <div className="bg-muted/50 rounded-lg p-4">
                       <p className="text-xs font-semibold mb-2 uppercase text-center text-muted-foreground">
-                        Valor Companhia Aérea (Google Flights)
+                        Valor Companhia Aérea
                       </p>
                       <div className="space-y-1 text-sm">
                         <div className="flex justify-between">
@@ -505,7 +499,7 @@ const BookingForm = () => {
                         </div>
                       </div>
                       <p className="text-xs text-muted-foreground mt-2 text-center italic">
-                        * Preços ajustados para corresponder ao Google Flights
+                        * Valores podem variar conforme disponibilidade
                       </p>
                     </div>
 
