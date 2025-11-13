@@ -32,6 +32,8 @@ interface FlightOffer {
       duration: string;
     }>;
   }>;
+  departure_token?: string;
+  type?: string;
 }
 
 const FlightSearch = () => {

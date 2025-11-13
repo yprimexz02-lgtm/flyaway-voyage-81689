@@ -11,13 +11,127 @@ serve(async (req) => {
   }
 
   try {
-    const { origin, destination, departureDate, returnDate, adults, children, infants, travelClass } = await req.json();
+    const requestBody = await req.json();
+    const { origin, destination, departureDate, returnDate, adults, children, infants, travelClass, departure_token } = requestBody;
     
     const apiKey = Deno.env.get('SERPAPI_API_KEY');
     if (!apiKey) {
       throw new Error('SERPAPI_API_KEY not configured');
     }
 
+    // If departure_token is provided, search for return flights
+    if (departure_token) {
+      console.log('Searching return flights with departure_token');
+      
+      const params = new URLSearchParams({
+        engine: 'google_flights',
+        departure_token: departure_token,
+        currency: 'BRL',
+        hl: 'pt-br',
+        api_key: apiKey,
+      });
+
+      const serpApiUrl = `https://serpapi.com/search?${params.toString()}`;
+      console.log('SerpApi request URL (return flights):', serpApiUrl.replace(apiKey, 'HIDDEN'));
+
+      const response = await fetch(serpApiUrl);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('SerpApi error:', response.status, errorText);
+        return new Response(
+          JSON.stringify({ 
+            error: `Erro na busca de voos de volta (${response.status}).`,
+            details: errorText 
+          }), 
+          {
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
+      }
+
+      const data = await response.json();
+      console.log('SerpApi response received for return flights, processing...');
+
+      // Process return flights - same structure as outbound
+      const flights = (data.best_flights || []).concat(data.other_flights || []).map((flight: any, index: number) => {
+        console.log(`Processing return flight ${index}:`, JSON.stringify(flight.flights));
+        
+        const itineraries = (flight.flights || []).map((leg: any) => {
+          console.log(`Processing leg:`, JSON.stringify(leg));
+          
+          return {
+            duration: `PT${Math.floor((leg?.duration || 0) / 60)}H${(leg?.duration || 0) % 60}M`,
+            segments: (leg?.layovers || []).length > 0 
+              ? leg.layovers.map((segment: any) => ({
+                  departure: {
+                    iataCode: segment.departure_airport?.id || '',
+                    at: `${segment.departure_airport?.time}` || ''
+                  },
+                  arrival: {
+                    iataCode: segment.arrival_airport?.id || '',
+                    at: `${segment.arrival_airport?.time}` || ''
+                  },
+                  carrierCode: segment.airline || 'XX',
+                  number: segment.flight_number || '',
+                  duration: `PT${Math.floor((segment.duration || 0) / 60)}H${(segment.duration || 0) % 60}M`
+                }))
+              : [{
+                  departure: {
+                    iataCode: leg.departure_airport?.id || '',
+                    at: `${leg.departure_airport?.time}` || ''
+                  },
+                  arrival: {
+                    iataCode: leg.arrival_airport?.id || '',
+                    at: `${leg.arrival_airport?.time}` || ''
+                  },
+                  carrierCode: leg.airline || 'XX',
+                  number: leg.flight_number || '',
+                  duration: `PT${Math.floor((leg.duration || 0) / 60)}H${(leg.duration || 0) % 60}M`
+                }]
+          };
+        });
+
+        console.log(`Return flight ${index} has ${itineraries.length} itineraries`);
+
+        return {
+          id: `serpapi-return-${index}`,
+          price: {
+            total: String(flight.price || 0),
+            currency: 'BRL'
+          },
+          itineraries,
+          type: flight.type
+        };
+      });
+
+      // Build carriers dictionary
+      const carriers: Record<string, string> = {};
+      flights.forEach((flight: any) => {
+        flight.itineraries.forEach((itinerary: any) => {
+          itinerary.segments.forEach((segment: any) => {
+            if (segment.carrierCode && !carriers[segment.carrierCode]) {
+              carriers[segment.carrierCode] = segment.carrierCode;
+            }
+          });
+        });
+      });
+
+      console.log(`Found ${flights.length} return flights`);
+
+      return new Response(
+        JSON.stringify({
+          data: flights,
+          dictionaries: { carriers }
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    // Otherwise, search for outbound flights
     console.log('Searching flights with SerpApi:', { origin, destination, departureDate, returnDate, adults, children, infants, travelClass });
 
     // Build SerpApi Google Flights URL
@@ -80,36 +194,44 @@ serve(async (req) => {
 
     // Transform SerpApi response to match our FlightOffer interface
     const flights = (data.best_flights || []).concat(data.other_flights || []).map((flight: any, index: number) => {
-      const itineraries = (flight.flights || []).map((leg: any) => ({
-        duration: `PT${Math.floor((leg?.duration || 0) / 60)}H${(leg?.duration || 0) % 60}M`,
-        segments: (leg?.layovers || []).length > 0 
-          ? leg.layovers.map((segment: any) => ({
-              departure: {
-                iataCode: segment.departure_airport?.id || '',
-                at: `${segment.departure_airport?.time}` || ''
-              },
-              arrival: {
-                iataCode: segment.arrival_airport?.id || '',
-                at: `${segment.arrival_airport?.time}` || ''
-              },
-              carrierCode: segment.airline || 'XX',
-              number: segment.flight_number || '',
-              duration: `PT${Math.floor((segment.duration || 0) / 60)}H${(segment.duration || 0) % 60}M`
-            }))
-          : [{
-              departure: {
-                iataCode: leg.departure_airport?.id || '',
-                at: `${leg.departure_airport?.time}` || ''
-              },
-              arrival: {
-                iataCode: leg.arrival_airport?.id || '',
-                at: `${leg.arrival_airport?.time}` || ''
-              },
-              carrierCode: leg.airline || 'XX',
-              number: leg.flight_number || '',
-              duration: `PT${Math.floor((leg.duration || 0) / 60)}H${(leg.duration || 0) % 60}M`
-            }]
-      }));
+      console.log(`Processing flight ${index}:`, JSON.stringify(flight.flights));
+      
+      const itineraries = (flight.flights || []).map((leg: any) => {
+        console.log(`Processing leg:`, JSON.stringify(leg));
+        
+        return {
+          duration: `PT${Math.floor((leg?.duration || 0) / 60)}H${(leg?.duration || 0) % 60}M`,
+          segments: (leg?.layovers || []).length > 0 
+            ? leg.layovers.map((segment: any) => ({
+                departure: {
+                  iataCode: segment.departure_airport?.id || '',
+                  at: `${segment.departure_airport?.time}` || ''
+                },
+                arrival: {
+                  iataCode: segment.arrival_airport?.id || '',
+                  at: `${segment.arrival_airport?.time}` || ''
+                },
+                carrierCode: segment.airline || 'XX',
+                number: segment.flight_number || '',
+                duration: `PT${Math.floor((segment.duration || 0) / 60)}H${(segment.duration || 0) % 60}M`
+              }))
+            : [{
+                departure: {
+                  iataCode: leg.departure_airport?.id || '',
+                  at: `${leg.departure_airport?.time}` || ''
+                },
+                arrival: {
+                  iataCode: leg.arrival_airport?.id || '',
+                  at: `${leg.arrival_airport?.time}` || ''
+                },
+                carrierCode: leg.airline || 'XX',
+                number: leg.flight_number || '',
+                duration: `PT${Math.floor((leg.duration || 0) / 60)}H${(leg.duration || 0) % 60}M`
+              }]
+        };
+      });
+
+      console.log(`Flight ${index} has ${itineraries.length} itineraries (should be 2 for round trip)`);
 
       return {
         id: `serpapi-${index}`,
@@ -117,7 +239,9 @@ serve(async (req) => {
           total: String(flight.price || 0),
           currency: 'BRL'
         },
-        itineraries
+        itineraries,
+        departure_token: flight.departure_token,
+        type: flight.type
       };
     });
 
