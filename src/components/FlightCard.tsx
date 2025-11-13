@@ -64,7 +64,7 @@ const FlightCard = ({ flight, carriers, flightType = 'outbound', onSelect, butto
 
   // Preço da API já vem completo com todas as taxas incluídas
   const airlinePriceInBRL = parseFloat(flight.price.total);
-  const gfcTravelPrice = airlinePriceInBRL * 0.88; // 12% discount
+  const gfcTravelPrice = airlinePriceInBRL * 0.94; // 6% discount
   
   console.log('Preço calculado:', {
     precoCompanhia: airlinePriceInBRL.toFixed(2),

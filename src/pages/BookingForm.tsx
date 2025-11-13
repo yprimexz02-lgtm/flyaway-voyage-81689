@@ -169,15 +169,15 @@ const BookingForm = () => {
     // Soma dos preços sem desconto
     const totalBeforeDiscount = outboundPrice + returnPrice;
     
-    // Aplica desconto de 12% da GFC Travel
-    const discount = totalBeforeDiscount * 0.12;
+    // Aplica desconto de 6% da GFC Travel
+    const discount = totalBeforeDiscount * 0.06;
     const finalPrice = totalBeforeDiscount - discount;
     
     console.log('📊 Conferência de Preços:', {
       'Voo Ida (API)': `R$ ${outboundPrice.toFixed(2)}`,
       'Voo Volta (API)': `R$ ${returnPrice.toFixed(2)}`,
       'Total CIA (sem desconto)': `R$ ${totalBeforeDiscount.toFixed(2)}`,
-      'Desconto GFC (12%)': `R$ ${discount.toFixed(2)}`,
+      'Desconto GFC (6%)': `R$ ${discount.toFixed(2)}`,
       'Preço Final GFC': `R$ ${finalPrice.toFixed(2)}`
     });
     
@@ -510,7 +510,7 @@ const BookingForm = () => {
                       </p>
                       <div className="space-y-1 mb-2">
                         <div className="flex justify-between text-xs text-muted-foreground">
-                          <span>Desconto GFC Travel (12%):</span>
+                          <span>Desconto GFC Travel (6%):</span>
                           <span className="text-green-600 font-medium">
                             -R$ {calculateTotalPrice().discount.toFixed(2)}
                           </span>
