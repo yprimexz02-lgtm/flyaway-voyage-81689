@@ -376,7 +376,6 @@ const FlightSelection = () => {
                       flightType="outbound"
                       onSelect={() => handleSelectOutbound(flight)}
                       buttonLabel="Selecionar voo de ida"
-                      isRoundTrip={!!searchParams.get("returnDate")}
                     />
                   ))}
                 </div>
@@ -392,7 +391,6 @@ const FlightSelection = () => {
                       flightType="return"
                       onSelect={() => handleSelectReturn(flight)}
                       buttonLabel="Selecionar e finalizar"
-                      isRoundTrip={true}
                     />
                   ))}
                 </div>

@@ -384,16 +384,16 @@ const BookingForm = () => {
 
                   {/* Preço Total */}
                   <div className="pt-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-muted-foreground">Total</span>
-                      <div className="text-right">
-                        <p className="text-2xl font-bold text-primary">
-                          {flightData.currency} {parseFloat(flightData.totalPrice).toFixed(2)}
-                        </p>
-                        <p className="text-xs text-muted-foreground uppercase">
-                          Pela GFC TRAVEL
-                        </p>
-                      </div>
+                    <div className="bg-primary/10 rounded-lg p-4">
+                      <p className="text-xs text-primary font-semibold mb-2 uppercase text-center">
+                        Preço Total Ida e Volta pela GFC Travel
+                      </p>
+                      <p className="text-3xl font-bold text-primary text-center">
+                        R$ {parseFloat(flightData.totalPrice).toFixed(2)}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-2 text-center">
+                        ou até 12x de R$ {(parseFloat(flightData.totalPrice) / 12).toFixed(2)}
+                      </p>
                     </div>
                   </div>
 
