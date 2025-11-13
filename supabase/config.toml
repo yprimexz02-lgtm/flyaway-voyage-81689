@@ -1,1 +1,4 @@
 project_id = "sdimsjvesepauolkjosr"
+
+[functions.search-flights-serpapi]
+verify_jwt = false

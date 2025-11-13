@@ -69,7 +69,7 @@ const FlightSearch = () => {
     };
 
     try {
-      const { data, error: invokeError } = await supabase.functions.invoke("search-flights-travelpayouts", { body: searchData });
+      const { data, error: invokeError } = await supabase.functions.invoke("search-flights-serpapi", { body: searchData });
 
       if (invokeError) {
         throw invokeError;
@@ -107,7 +107,7 @@ const FlightSearch = () => {
         });
       }
     } catch (err: any) {
-      console.error("Travelpayouts search failed:", err);
+      console.error("Flight search failed:", err);
       toast({
         title: "Erro Crítico na Busca",
         description: err.message || "Não foi possível buscar os voos. Por favor, tente novamente.",

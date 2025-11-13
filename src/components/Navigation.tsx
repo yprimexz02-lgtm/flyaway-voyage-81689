@@ -6,7 +6,6 @@ const Navigation = () => {
     { path: "/buscar-voos", label: "Buscar Voos" },
     { path: "/pacotes", label: "Pacotes" },
     { path: "/contato", label: "Contato" },
-    { path: "/buscador-verdadeiro", label: "Buscador Verdadeiro" },
   ];
 
   return (
