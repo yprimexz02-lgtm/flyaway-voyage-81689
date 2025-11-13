@@ -370,18 +370,15 @@ const FlightSelection = () => {
               {!loading && step === 'outbound' && filteredFlights.length > 0 && (
                 <div className="space-y-6">
                   {filteredFlights.map((flight) => (
-                    <div key={flight.id} className="relative">
-                      <FlightCard flight={flight} carriers={dictionaries.carriers || {}} flightType="outbound" />
-                      <Button
-                        onClick={() => handleSelectOutbound(flight)}
-                        className="absolute bottom-4 right-4 md:bottom-6 md:right-6"
-                        size="lg"
-                      >
-                        <span className="hidden sm:inline">Selecionar voo de ida</span>
-                        <span className="sm:hidden">Selecionar</span>
-                        <ArrowRight className="w-4 h-4 ml-2" />
-                      </Button>
-                    </div>
+                    <FlightCard 
+                      key={flight.id}
+                      flight={flight} 
+                      carriers={dictionaries.carriers || {}} 
+                      flightType="outbound"
+                      onSelect={() => handleSelectOutbound(flight)}
+                      buttonLabel="Selecionar voo de ida"
+                      isRoundTrip={!!searchParams.get("returnDate")}
+                    />
                   ))}
                 </div>
               )}
@@ -389,18 +386,15 @@ const FlightSelection = () => {
               {!loading && step === 'return' && filteredFlights.length > 0 && (
                 <div className="space-y-6">
                   {filteredFlights.map((flight) => (
-                    <div key={flight.id} className="relative">
-                      <FlightCard flight={flight} carriers={dictionaries.carriers || {}} flightType="return" />
-                      <Button
-                        onClick={() => handleSelectReturn(flight)}
-                        className="absolute bottom-4 right-4 md:bottom-6 md:right-6"
-                        size="lg"
-                      >
-                        <span className="hidden sm:inline">Selecionar e finalizar</span>
-                        <span className="sm:hidden">Finalizar</span>
-                        <ArrowRight className="w-4 h-4 ml-2" />
-                      </Button>
-                    </div>
+                    <FlightCard 
+                      key={flight.id}
+                      flight={flight} 
+                      carriers={dictionaries.carriers || {}} 
+                      flightType="return"
+                      onSelect={() => handleSelectReturn(flight)}
+                      buttonLabel="Selecionar e finalizar"
+                      isRoundTrip={true}
+                    />
                   ))}
                 </div>
               )}
