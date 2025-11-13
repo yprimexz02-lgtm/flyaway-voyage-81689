@@ -85,8 +85,6 @@ const FlightSearchForm = ({ variant = "page" }: FlightSearchFormProps) => {
     departureDate: "",
     returnDate: "",
     adults: "1",
-    children: "0",
-    infants: "0",
     travelClass: "ECONOMY",
     tripType: "roundtrip",
   });
@@ -167,8 +165,6 @@ const FlightSearchForm = ({ variant = "page" }: FlightSearchFormProps) => {
         departureDate: format(departureDate, "yyyy-MM-dd"),
         ...(formData.tripType === "roundtrip" && returnDate ? { returnDate: format(returnDate, "yyyy-MM-dd") } : {}),
         adults: formData.adults,
-        children: formData.children,
-        infants: formData.infants,
         travelClass: formData.travelClass,
       });
       navigate(`/buscar-voos?${params.toString()}`);
@@ -376,32 +372,6 @@ const FlightSearchForm = ({ variant = "page" }: FlightSearchFormProps) => {
             <SelectContent>
               {[1, 2, 3, 4, 5, 6].map((num) => (
                 <SelectItem key={num} value={num.toString()}>{num} {num === 1 ? "adulto" : "adultos"}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Crianças */}
-        <div className="space-y-2">
-          <Label htmlFor="children" className="text-sm font-medium">Crianças (2-11)</Label>
-          <Select value={formData.children} onValueChange={(value) => setFormData({ ...formData, children: value })}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {[0, 1, 2, 3, 4, 5, 6].map((num) => (
-                <SelectItem key={num} value={num.toString()}>{num} {num === 1 ? "criança" : "crianças"}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Bebês */}
-        <div className="space-y-2">
-          <Label htmlFor="infants" className="text-sm font-medium">Bebês (&lt;2)</Label>
-          <Select value={formData.infants} onValueChange={(value) => setFormData({ ...formData, infants: value })}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {[0, 1, 2, 3, 4, 5, 6].map((num) => (
-                <SelectItem key={num} value={num.toString()}>{num} {num === 1 ? "bebê" : "bebês"}</SelectItem>
               ))}
             </SelectContent>
           </Select>

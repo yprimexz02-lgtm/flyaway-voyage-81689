@@ -101,14 +101,25 @@ const FlightSearch = () => {
       setFlights(flightResults);
       setDictionaries(flightDictionaries);
 
-      // Reset filters when new search is performed
-      const maxPrice = Math.max(...flightResults.map(f => parseFloat(f.price.total)), 10000);
-      setFilters({
-        priceRange: [0, maxPrice],
-        selectedAirlines: [],
-        maxStops: null,
-        departureTimeRange: [],
-      });
+      // Reset filters when new search is performed with actual min/max prices from results
+      if (flightResults.length > 0) {
+        const prices = flightResults.map(f => parseFloat(f.price.total));
+        const minPrice = Math.min(...prices);
+        const maxPrice = Math.max(...prices);
+        setFilters({
+          priceRange: [minPrice, maxPrice],
+          selectedAirlines: [],
+          maxStops: null,
+          departureTimeRange: [],
+        });
+      } else {
+        setFilters({
+          priceRange: [0, 10000],
+          selectedAirlines: [],
+          maxStops: null,
+          departureTimeRange: [],
+        });
+      }
 
       if (flightResults.length > 0) {
         toast({
@@ -193,7 +204,13 @@ const FlightSearch = () => {
   }, [flights]);
 
   const maxPrice = useMemo(() => {
-    return Math.max(...flights.map(f => parseFloat(f.price.total)), 10000);
+    if (flights.length === 0) return 10000;
+    return Math.max(...flights.map(f => parseFloat(f.price.total)));
+  }, [flights]);
+
+  const minPrice = useMemo(() => {
+    if (flights.length === 0) return 0;
+    return Math.min(...flights.map(f => parseFloat(f.price.total)));
   }, [flights]);
 
   return (
@@ -228,6 +245,7 @@ const FlightSearch = () => {
               {/* Filters Sidebar */}
               <div className="lg:col-span-1">
                 <FlightFilters
+                  minPrice={minPrice}
                   maxPrice={maxPrice}
                   airlines={availableAirlines}
                   onFilterChange={setFilters}
