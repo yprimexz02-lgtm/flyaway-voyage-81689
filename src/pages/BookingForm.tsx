@@ -186,18 +186,24 @@ const BookingForm = () => {
     const discount = totalBeforeDiscount * 0.12;
     const finalPrice = totalBeforeDiscount - discount;
     
-    console.log('Cálculo de preços:', {
-      outbound: { original: flightData.outbound.price.total, currency: flightData.outbound.price.currency, brl: outboundPrice },
-      return: flightData.return ? { original: flightData.return.price.total, currency: flightData.return.price.currency, brl: returnPrice } : null,
-      totalBeforeDiscount,
-      discount,
-      finalPrice
+    console.log('📊 Conferência de Preços:', {
+      'Voo de Ida': { 
+        original: `${flightData.outbound.price.currency} ${flightData.outbound.price.total}`,
+        brl: `R$ ${outboundPrice.toFixed(2)}`
+      },
+      'Voo de Volta': flightData.return ? { 
+        original: `${flightData.return.price.currency} ${flightData.return.price.total}`,
+        brl: `R$ ${returnPrice.toFixed(2)}`
+      } : 'N/A',
+      'Total CIA (sem desconto)': `R$ ${totalBeforeDiscount.toFixed(2)}`,
+      'Desconto GFC (12%)': `R$ ${discount.toFixed(2)}`,
+      'Total Final GFC': `R$ ${finalPrice.toFixed(2)}`
     });
     
-    return finalPrice;
+    return { totalBeforeDiscount, discount, finalPrice };
   };
 
-  const finalPrice = calculateTotalPrice();
+  const { finalPrice } = calculateTotalPrice();
 
   return (
     <div className="min-h-screen bg-background">
@@ -484,11 +490,54 @@ const BookingForm = () => {
                   )}
 
                   {/* Preço Total */}
-                  <div className="pt-2">
+                  <div className="pt-2 space-y-3">
+                    {/* Preço Original da CIA */}
+                    <div className="bg-muted/50 rounded-lg p-4">
+                      <p className="text-xs font-semibold mb-2 uppercase text-center text-muted-foreground">
+                        Valor Original Companhia Aérea
+                      </p>
+                      <div className="space-y-1 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Voo de Ida:</span>
+                          <span className="font-medium">
+                            {flightData.outbound.price.currency} {parseFloat(flightData.outbound.price.total).toFixed(2)}
+                            {flightData.outbound.price.currency === "EUR" && 
+                              ` (R$ ${(parseFloat(flightData.outbound.price.total) * 5.85).toFixed(2)})`
+                            }
+                          </span>
+                        </div>
+                        {flightData.return && (
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Voo de Volta:</span>
+                            <span className="font-medium">
+                              {flightData.return.price.currency} {parseFloat(flightData.return.price.total).toFixed(2)}
+                              {flightData.return.price.currency === "EUR" && 
+                                ` (R$ ${(parseFloat(flightData.return.price.total) * 5.85).toFixed(2)})`
+                              }
+                            </span>
+                          </div>
+                        )}
+                        <Separator className="my-2" />
+                        <div className="flex justify-between font-semibold">
+                          <span>Total CIA:</span>
+                          <span>R$ {calculateTotalPrice().totalBeforeDiscount.toFixed(2)}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Preço GFC Travel com Desconto */}
                     <div className="bg-primary/10 rounded-lg p-4">
                       <p className="text-xs text-primary font-semibold mb-2 uppercase text-center">
-                        Preço Total Ida e Volta pela GFC Travel
+                        IDA E VOLTA PELA GFC
                       </p>
+                      <div className="space-y-1 mb-2">
+                        <div className="flex justify-between text-xs text-muted-foreground">
+                          <span>Desconto GFC Travel (12%):</span>
+                          <span className="text-green-600 font-medium">
+                            -R$ {calculateTotalPrice().discount.toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
                       <p className="text-3xl font-bold text-primary text-center">
                         R$ {finalPrice.toFixed(2)}
                       </p>
