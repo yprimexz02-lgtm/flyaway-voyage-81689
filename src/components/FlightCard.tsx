@@ -202,7 +202,7 @@ const FlightCard = ({ flight, carriers, flightType = 'outbound', onSelect, butto
             
             <div className="bg-primary/10 rounded-lg p-3 mb-4">
               <p className="text-xs text-primary font-semibold mb-1">
-                {isRoundTrip ? "PREÇO TOTAL IDA E VOLTA" : "PREÇO GFC TRAVEL"}
+                {isRoundTrip ? "PREÇO TOTAL IDA E VOLTA PELA GFC TRAVEL" : "PREÇO PELA GFC TRAVEL"}
               </p>
               <p className="text-2xl sm:text-3xl font-bold text-primary">
                 R$ {gfcTravelPrice.toFixed(2)}
