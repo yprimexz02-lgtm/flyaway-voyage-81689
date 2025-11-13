@@ -48,8 +48,59 @@ const BookingForm = () => {
     passportExpiry: "",
   });
 
+  const validateCPF = (cpf: string): boolean => {
+    // Remove caracteres não numéricos
+    const cleanCPF = cpf.replace(/\D/g, '');
+    
+    // Verifica se tem 11 dígitos
+    if (cleanCPF.length !== 11) return false;
+    
+    // Verifica se todos os dígitos são iguais
+    if (/^(\d)\1{10}$/.test(cleanCPF)) return false;
+    
+    // Valida primeiro dígito verificador
+    let sum = 0;
+    for (let i = 0; i < 9; i++) {
+      sum += parseInt(cleanCPF.charAt(i)) * (10 - i);
+    }
+    let digit = 11 - (sum % 11);
+    if (digit >= 10) digit = 0;
+    if (digit !== parseInt(cleanCPF.charAt(9))) return false;
+    
+    // Valida segundo dígito verificador
+    sum = 0;
+    for (let i = 0; i < 10; i++) {
+      sum += parseInt(cleanCPF.charAt(i)) * (11 - i);
+    }
+    digit = 11 - (sum % 11);
+    if (digit >= 10) digit = 0;
+    if (digit !== parseInt(cleanCPF.charAt(10))) return false;
+    
+    return true;
+  };
+
+  const formatCPF = (value: string): string => {
+    const cleaned = value.replace(/\D/g, '');
+    const match = cleaned.match(/^(\d{0,3})(\d{0,3})(\d{0,3})(\d{0,2})$/);
+    if (match) {
+      return [match[1], match[2], match[3], match[4]]
+        .filter(group => group)
+        .join('.')
+        .replace(/\.(\d{2})$/, '-$1');
+    }
+    return value;
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    
+    // Aplica máscara de CPF
+    if (name === 'cpf') {
+      const formatted = formatCPF(value);
+      setFormData(prev => ({ ...prev, [name]: formatted }));
+      return;
+    }
+    
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
@@ -57,10 +108,20 @@ const BookingForm = () => {
     e.preventDefault();
     
     // Validação básica
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone) {
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone || !formData.cpf) {
       toast({
         title: "Campos obrigatórios",
         description: "Por favor, preencha todos os campos obrigatórios.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validação de CPF
+    if (!validateCPF(formData.cpf)) {
+      toast({
+        title: "CPF inválido",
+        description: "Por favor, digite um CPF válido.",
         variant: "destructive",
       });
       return;
@@ -98,6 +159,30 @@ const BookingForm = () => {
       return dateString;
     }
   };
+
+  // Calcula o preço final correto com desconto GFC Travel
+  const calculateTotalPrice = () => {
+    const eurToBrl = 5.85;
+    
+    // Preço do voo de ida
+    const outboundPrice = flightData.outbound.price.currency === "EUR" 
+      ? parseFloat(flightData.outbound.price.total) * eurToBrl 
+      : parseFloat(flightData.outbound.price.total);
+    
+    // Preço do voo de volta
+    const returnPrice = flightData.return 
+      ? (flightData.return.price.currency === "EUR" 
+        ? parseFloat(flightData.return.price.total) * eurToBrl 
+        : parseFloat(flightData.return.price.total))
+      : 0;
+    
+    // Aplica desconto de 12% (0.88)
+    const totalWithDiscount = (outboundPrice + returnPrice) * 0.88;
+    
+    return totalWithDiscount;
+  };
+
+  const finalPrice = calculateTotalPrice();
 
   return (
     <div className="min-h-screen bg-background">
@@ -162,6 +247,7 @@ const BookingForm = () => {
                           value={formData.cpf}
                           onChange={handleInputChange}
                           placeholder="000.000.000-00"
+                          maxLength={14}
                           required
                         />
                       </div>
@@ -389,10 +475,10 @@ const BookingForm = () => {
                         Preço Total Ida e Volta pela GFC Travel
                       </p>
                       <p className="text-3xl font-bold text-primary text-center">
-                        R$ {parseFloat(flightData.totalPrice).toFixed(2)}
+                        R$ {finalPrice.toFixed(2)}
                       </p>
                       <p className="text-xs text-muted-foreground mt-2 text-center">
-                        ou até 12x de R$ {(parseFloat(flightData.totalPrice) / 12).toFixed(2)}
+                        ou até 12x de R$ {(finalPrice / 12).toFixed(2)}
                       </p>
                     </div>
                   </div>
