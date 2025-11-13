@@ -26,6 +26,7 @@ interface FlightOffer {
       duration: string;
     }>;
   }>;
+  type?: string; // Tipo de tarifa (ex: "Nonstop", "1 stop", ou informações sobre reembolso)
 }
 
 interface FlightCardProps {
@@ -212,8 +213,20 @@ const FlightCard = ({ flight, carriers, flightType = 'outbound', onSelect, butto
               </p>
             </div>
             
-            <p className="text-xs text-muted-foreground mb-4">
+            <p className="text-xs text-muted-foreground mb-2">
               ou até 12x de <span className="font-semibold text-foreground">R$ {(gfcTravelPrice / 12).toFixed(2)}</span>
+            </p>
+            
+            {flight.type && (
+              <div className="bg-background/50 rounded p-2 mb-2">
+                <p className="text-xs text-muted-foreground">
+                  <span className="font-semibold">Tarifa:</span> {flight.type}
+                </p>
+              </div>
+            )}
+            
+            <p className="text-xs text-muted-foreground italic">
+              * Preço inclui todas as taxas de embarque
             </p>
           </div>
 
