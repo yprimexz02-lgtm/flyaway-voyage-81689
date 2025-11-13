@@ -32,9 +32,12 @@ interface FlightCardProps {
   flight: FlightOffer;
   carriers: Record<string, string>;
   flightType?: 'outbound' | 'return';
+  onSelect?: () => void;
+  buttonLabel?: string;
+  isRoundTrip?: boolean;
 }
 
-const FlightCard = ({ flight, carriers, flightType = 'outbound' }: FlightCardProps) => {
+const FlightCard = ({ flight, carriers, flightType = 'outbound', onSelect, buttonLabel, isRoundTrip = false }: FlightCardProps) => {
   const formatTime = (dateStr: string) => new Date(dateStr).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
   const formatDate = (dateStr: string) => new Date(dateStr).toLocaleDateString("pt-BR", { day: '2-digit', month: 'short' });
   
@@ -191,14 +194,16 @@ const FlightCard = ({ flight, carriers, flightType = 'outbound' }: FlightCardPro
 
         {/* Price Section */}
         <div className="lg:w-64 bg-muted/30 p-4 sm:p-6 flex flex-col justify-between border-t lg:border-t-0 lg:border-l border-border">
-          <div>
+          <div className="flex-grow">
             <p className="text-xs sm:text-sm text-muted-foreground mb-1">Preço da companhia</p>
             <p className="text-base sm:text-lg font-semibold text-muted-foreground line-through mb-3">
               R$ {airlinePriceInBRL.toFixed(2)}
             </p>
             
             <div className="bg-primary/10 rounded-lg p-3 mb-4">
-              <p className="text-xs text-primary font-semibold mb-1">PREÇO GFC TRAVEL</p>
+              <p className="text-xs text-primary font-semibold mb-1">
+                {isRoundTrip ? "PREÇO TOTAL IDA E VOLTA" : "PREÇO GFC TRAVEL"}
+              </p>
               <p className="text-2xl sm:text-3xl font-bold text-primary">
                 R$ {gfcTravelPrice.toFixed(2)}
               </p>
@@ -207,10 +212,21 @@ const FlightCard = ({ flight, carriers, flightType = 'outbound' }: FlightCardPro
               </p>
             </div>
             
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground mb-4">
               ou até 12x de <span className="font-semibold text-foreground">R$ {(gfcTravelPrice / 12).toFixed(2)}</span>
             </p>
           </div>
+
+          {onSelect && buttonLabel && (
+            <Button
+              onClick={onSelect}
+              className="w-full mt-4"
+              size="lg"
+            >
+              {buttonLabel}
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          )}
         </div>
       </div>
     </Card>
