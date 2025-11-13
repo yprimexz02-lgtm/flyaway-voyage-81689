@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import FlightSearchForm from "@/components/FlightSearchForm";
 import FlightCard from "@/components/FlightCard";
+import FlightFilters, { FilterState } from "@/components/FlightFilters";
 import { Button } from "@/components/ui/button";
 import { Loader2, Plane, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -39,6 +40,12 @@ const FlightSearch = () => {
   const [flights, setFlights] = useState<FlightOffer[]>([]);
   const [dictionaries, setDictionaries] = useState<any>({});
   const [loading, setLoading] = useState(false);
+  const [filters, setFilters] = useState<FilterState>({
+    priceRange: [0, 10000],
+    selectedAirlines: [],
+    maxStops: null,
+    departureTimeRange: [],
+  });
   const { toast } = useToast();
 
   useEffect(() => {
@@ -94,6 +101,15 @@ const FlightSearch = () => {
       setFlights(flightResults);
       setDictionaries(flightDictionaries);
 
+      // Reset filters when new search is performed
+      const maxPrice = Math.max(...flightResults.map(f => parseFloat(f.price.total)), 10000);
+      setFilters({
+        priceRange: [0, maxPrice],
+        selectedAirlines: [],
+        maxStops: null,
+        departureTimeRange: [],
+      });
+
       if (flightResults.length > 0) {
         toast({
           title: "Voos encontrados!",
@@ -117,6 +133,68 @@ const FlightSearch = () => {
       setLoading(false);
     }
   };
+
+  // Filter flights based on active filters
+  const filteredFlights = useMemo(() => {
+    return flights.filter((flight) => {
+      const price = parseFloat(flight.price.total);
+      
+      // Price filter
+      if (price < filters.priceRange[0] || price > filters.priceRange[1]) {
+        return false;
+      }
+
+      // Airline filter
+      if (filters.selectedAirlines.length > 0) {
+        const flightAirlines = flight.itineraries.flatMap(it => 
+          it.segments.map(seg => seg.carrierCode)
+        );
+        if (!flightAirlines.some(airline => filters.selectedAirlines.includes(airline))) {
+          return false;
+        }
+      }
+
+      // Stops filter
+      if (filters.maxStops !== null) {
+        const maxStopsInFlight = Math.max(...flight.itineraries.map(it => it.segments.length - 1));
+        if (maxStopsInFlight > filters.maxStops) {
+          return false;
+        }
+      }
+
+      // Departure time filter
+      if (filters.departureTimeRange.length > 0) {
+        const departureHour = new Date(flight.itineraries[0].segments[0].departure.at).getHours();
+        const matchesTimeRange = filters.departureTimeRange.some(range => {
+          if (range === 'night' && departureHour >= 0 && departureHour < 6) return true;
+          if (range === 'morning' && departureHour >= 6 && departureHour < 12) return true;
+          if (range === 'afternoon' && departureHour >= 12 && departureHour < 18) return true;
+          if (range === 'evening' && departureHour >= 18 && departureHour < 24) return true;
+          return false;
+        });
+        if (!matchesTimeRange) return false;
+      }
+
+      return true;
+    });
+  }, [flights, filters]);
+
+  // Get unique airlines for filter
+  const availableAirlines = useMemo(() => {
+    const airlines = new Set<string>();
+    flights.forEach(flight => {
+      flight.itineraries.forEach(itinerary => {
+        itinerary.segments.forEach(segment => {
+          airlines.add(segment.carrierCode);
+        });
+      });
+    });
+    return Array.from(airlines).sort();
+  }, [flights]);
+
+  const maxPrice = useMemo(() => {
+    return Math.max(...flights.map(f => parseFloat(f.price.total)), 10000);
+  }, [flights]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -146,18 +224,43 @@ const FlightSearch = () => {
           )}
 
           {!loading && flights.length > 0 && (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold">
-                {flights.length} {flights.length === 1 ? "voo encontrado" : "voos encontrados"}
-              </h2>
-              
-              {flights.map((flight) => (
-                <FlightCard 
-                  key={flight.id} 
-                  flight={flight} 
-                  carriers={dictionaries.carriers || {}} 
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              {/* Filters Sidebar */}
+              <div className="lg:col-span-1">
+                <FlightFilters
+                  maxPrice={maxPrice}
+                  airlines={availableAirlines}
+                  onFilterChange={setFilters}
                 />
-              ))}
+              </div>
+
+              {/* Flight Results */}
+              <div className="lg:col-span-3 space-y-6">
+                <h2 className="text-2xl font-bold">
+                  {filteredFlights.length} {filteredFlights.length === 1 ? "voo encontrado" : "voos encontrados"}
+                  {filteredFlights.length !== flights.length && (
+                    <span className="text-muted-foreground text-lg ml-2">
+                      (de {flights.length} total)
+                    </span>
+                  )}
+                </h2>
+                
+                {filteredFlights.length > 0 ? (
+                  filteredFlights.map((flight) => (
+                    <FlightCard 
+                      key={flight.id} 
+                      flight={flight} 
+                      carriers={dictionaries.carriers || {}} 
+                    />
+                  ))
+                ) : (
+                  <div className="text-center py-20">
+                    <Plane className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                    <h3 className="text-xl font-semibold mb-2">Nenhum voo corresponde aos filtros</h3>
+                    <p className="text-muted-foreground">Tente ajustar os filtros para ver mais resultados</p>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 

@@ -80,8 +80,36 @@ serve(async (req) => {
 
     // Transform SerpApi response to match our FlightOffer interface
     const flights = (data.best_flights || []).concat(data.other_flights || []).map((flight: any, index: number) => {
-      const outbound = flight.flights?.[0];
-      const inbound = flight.flights?.[1];
+      const itineraries = (flight.flights || []).map((leg: any) => ({
+        duration: `PT${Math.floor((leg?.duration || 0) / 60)}H${(leg?.duration || 0) % 60}M`,
+        segments: (leg?.layovers || []).length > 0 
+          ? leg.layovers.map((segment: any) => ({
+              departure: {
+                iataCode: segment.departure_airport?.id || '',
+                at: `${segment.departure_airport?.time}` || ''
+              },
+              arrival: {
+                iataCode: segment.arrival_airport?.id || '',
+                at: `${segment.arrival_airport?.time}` || ''
+              },
+              carrierCode: segment.airline || 'XX',
+              number: segment.flight_number || '',
+              duration: `PT${Math.floor((segment.duration || 0) / 60)}H${(segment.duration || 0) % 60}M`
+            }))
+          : [{
+              departure: {
+                iataCode: leg.departure_airport?.id || '',
+                at: `${leg.departure_airport?.time}` || ''
+              },
+              arrival: {
+                iataCode: leg.arrival_airport?.id || '',
+                at: `${leg.arrival_airport?.time}` || ''
+              },
+              carrierCode: leg.airline || 'XX',
+              number: leg.flight_number || '',
+              duration: `PT${Math.floor((leg.duration || 0) / 60)}H${(leg.duration || 0) % 60}M`
+            }]
+      }));
 
       return {
         id: `serpapi-${index}`,
@@ -89,40 +117,7 @@ serve(async (req) => {
           total: String(flight.price || 0),
           currency: 'BRL'
         },
-        itineraries: [
-          {
-            duration: `PT${Math.floor((outbound?.duration || 0) / 60)}H${(outbound?.duration || 0) % 60}M`,
-            segments: (outbound?.layovers || [outbound]).filter(Boolean).map((segment: any) => ({
-              departure: {
-                iataCode: segment.departure_airport?.id || origin,
-                at: segment.departure_airport?.time || ''
-              },
-              arrival: {
-                iataCode: segment.arrival_airport?.id || destination,
-                at: segment.arrival_airport?.time || ''
-              },
-              carrierCode: segment.airline || 'XX',
-              number: segment.flight_number || '',
-              duration: `PT${Math.floor((segment.duration || 0) / 60)}H${(segment.duration || 0) % 60}M`
-            }))
-          },
-          ...(inbound ? [{
-            duration: `PT${Math.floor((inbound.duration || 0) / 60)}H${(inbound.duration || 0) % 60}M`,
-            segments: (inbound.layovers || [inbound]).filter(Boolean).map((segment: any) => ({
-              departure: {
-                iataCode: segment.departure_airport?.id || destination,
-                at: segment.departure_airport?.time || ''
-              },
-              arrival: {
-                iataCode: segment.arrival_airport?.id || origin,
-                at: segment.arrival_airport?.time || ''
-              },
-              carrierCode: segment.airline || 'XX',
-              number: segment.flight_number || '',
-              duration: `PT${Math.floor((segment.duration || 0) / 60)}H${(segment.duration || 0) % 60}M`
-            }))
-          }] : [])
-        ]
+        itineraries
       };
     });
 
