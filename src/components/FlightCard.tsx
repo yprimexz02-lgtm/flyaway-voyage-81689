@@ -31,9 +31,10 @@ interface FlightOffer {
 interface FlightCardProps {
   flight: FlightOffer;
   carriers: Record<string, string>;
+  flightType?: 'outbound' | 'return';
 }
 
-const FlightCard = ({ flight, carriers }: FlightCardProps) => {
+const FlightCard = ({ flight, carriers, flightType = 'outbound' }: FlightCardProps) => {
   const formatTime = (dateStr: string) => new Date(dateStr).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
   const formatDate = (dateStr: string) => new Date(dateStr).toLocaleDateString("pt-BR", { day: '2-digit', month: 'short' });
   
@@ -72,7 +73,7 @@ const FlightCard = ({ flight, carriers }: FlightCardProps) => {
           {flight.itineraries.map((itinerary, itineraryIndex) => (
             <div key={itineraryIndex} className="mb-6 last:mb-0">
               {/* Itinerary Header with Airline Info */}
-              <div className="flex justify-between items-center mb-6">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-2">
                     {itinerary.segments.map((seg, idx) => (
@@ -93,7 +94,7 @@ const FlightCard = ({ flight, carriers }: FlightCardProps) => {
                   </div>
                   <div>
                     <Badge variant="outline" className="font-semibold mb-1">
-                      {itineraryIndex === 0 ? "Voo de Ida" : "Voo de Volta"}
+                      {flightType === 'outbound' ? "Voo de Ida" : "Voo de Volta"}
                     </Badge>
                     <p className="text-sm text-muted-foreground">
                       {itinerary.segments.map(s => carriers[s.carrierCode] || s.carrierCode).join(" + ")}
@@ -110,43 +111,43 @@ const FlightCard = ({ flight, carriers }: FlightCardProps) => {
               <div className="space-y-6">
                 {itinerary.segments.map((segment, segmentIndex) => (
                   <div key={segmentIndex}>
-                    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-6">
+                    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-6">
                       {/* Departure */}
                       <div className="text-left">
-                        <p className="text-3xl font-bold text-foreground">{formatTime(segment.departure.at)}</p>
-                        <p className="text-xl font-semibold text-foreground mt-1">{segment.departure.iataCode}</p>
-                        <p className="text-sm text-muted-foreground mt-1">{formatDate(segment.departure.at)}</p>
+                        <p className="text-2xl sm:text-3xl font-bold text-foreground">{formatTime(segment.departure.at)}</p>
+                        <p className="text-lg sm:text-xl font-semibold text-foreground mt-1">{segment.departure.iataCode}</p>
+                        <p className="text-xs sm:text-sm text-muted-foreground mt-1">{formatDate(segment.departure.at)}</p>
                       </div>
 
                       {/* Arrow and Duration */}
-                      <div className="flex flex-col items-center min-w-[120px]">
+                      <div className="flex flex-col items-center min-w-[80px] sm:min-w-[120px]">
                         <div className="relative w-full">
                           <div className="absolute inset-0 flex items-center">
                             <div className="w-full border-t-2 border-border"></div>
                           </div>
                           <div className="relative flex justify-center">
-                            <Plane className="w-5 h-5 bg-card text-primary rotate-90" />
+                            <Plane className="w-4 h-4 sm:w-5 sm:h-5 bg-card text-primary rotate-90" />
                           </div>
                         </div>
-                        <p className="text-xs text-muted-foreground mt-2 font-medium">{formatDuration(segment.duration)}</p>
-                        <Badge variant="secondary" className="mt-1 text-xs">
+                        <p className="text-xs text-muted-foreground mt-2 font-medium text-center">{formatDuration(segment.duration)}</p>
+                        <Badge variant="secondary" className="mt-1 text-xs hidden sm:inline-flex">
                           {segment.carrierCode} {segment.number}
                         </Badge>
                       </div>
 
                       {/* Arrival */}
                       <div className="text-right">
-                        <p className="text-3xl font-bold text-foreground">{formatTime(segment.arrival.at)}</p>
-                        <p className="text-xl font-semibold text-foreground mt-1">{segment.arrival.iataCode}</p>
-                        <p className="text-sm text-muted-foreground mt-1">{formatDate(segment.arrival.at)}</p>
+                        <p className="text-2xl sm:text-3xl font-bold text-foreground">{formatTime(segment.arrival.at)}</p>
+                        <p className="text-lg sm:text-xl font-semibold text-foreground mt-1">{segment.arrival.iataCode}</p>
+                        <p className="text-xs sm:text-sm text-muted-foreground mt-1">{formatDate(segment.arrival.at)}</p>
                       </div>
                     </div>
 
                     {/* Layover info */}
                     {segmentIndex < itinerary.segments.length - 1 && (
-                      <div className="flex items-center justify-center gap-2 py-4 mt-4 bg-muted/30 rounded-lg">
+                      <div className="flex flex-col sm:flex-row items-center justify-center gap-2 py-3 sm:py-4 mt-4 bg-muted/30 rounded-lg">
                         <Clock className="w-4 h-4 text-muted-foreground" />
-                        <p className="text-sm text-muted-foreground font-medium">
+                        <p className="text-xs sm:text-sm text-muted-foreground font-medium text-center">
                           Conexão em {segment.arrival.iataCode} • 
                           Espera de {getLayoverDuration(segment.arrival.at, itinerary.segments[segmentIndex + 1].departure.at)}
                         </p>
@@ -164,13 +165,13 @@ const FlightCard = ({ flight, carriers }: FlightCardProps) => {
 
           {/* Flight Info Footer */}
           <div className="mt-6 pt-4 border-t border-border">
-            <div className="flex items-center justify-between text-sm">
-              <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Briefcase className="w-4 h-4" />
                   <span>Bagagem de mão incluída</span>
                 </div>
-                <Badge variant="outline" className="text-primary border-primary/50">
+                <Badge variant="outline" className="text-primary border-primary/50 w-fit">
                   {flight.itineraries[0].segments.length - 1 === 0 
                     ? "Voo direto" 
                     : `${flight.itineraries[0].segments.length - 1} parada${flight.itineraries[0].segments.length - 1 > 1 ? 's' : ''}`
@@ -189,16 +190,16 @@ const FlightCard = ({ flight, carriers }: FlightCardProps) => {
         </div>
 
         {/* Price Section */}
-        <div className="lg:w-64 bg-muted/30 p-6 flex flex-col justify-between border-t lg:border-t-0 lg:border-l border-border">
+        <div className="lg:w-64 bg-muted/30 p-4 sm:p-6 flex flex-col justify-between border-t lg:border-t-0 lg:border-l border-border">
           <div>
-            <p className="text-sm text-muted-foreground mb-1">Preço da companhia</p>
-            <p className="text-lg font-semibold text-muted-foreground line-through mb-3">
+            <p className="text-xs sm:text-sm text-muted-foreground mb-1">Preço da companhia</p>
+            <p className="text-base sm:text-lg font-semibold text-muted-foreground line-through mb-3">
               R$ {airlinePriceInBRL.toFixed(2)}
             </p>
             
             <div className="bg-primary/10 rounded-lg p-3 mb-4">
               <p className="text-xs text-primary font-semibold mb-1">PREÇO GFC TRAVEL</p>
-              <p className="text-3xl font-bold text-primary">
+              <p className="text-2xl sm:text-3xl font-bold text-primary">
                 R$ {gfcTravelPrice.toFixed(2)}
               </p>
               <p className="text-xs text-muted-foreground mt-1">

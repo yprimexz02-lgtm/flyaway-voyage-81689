@@ -4,7 +4,8 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import FlightCard from "@/components/FlightCard";
 import { Button } from "@/components/ui/button";
-import { Loader2, ArrowLeft, ArrowRight } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Loader2, ArrowLeft, ArrowRight, SlidersHorizontal } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import FlightFilters from "@/components/FlightFilters";
@@ -285,9 +286,9 @@ const FlightSelection = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
 
-      <div className="pt-32 pb-20">
+      <div className="pt-20 md:pt-32 pb-20">
         <div className="container mx-auto px-4">
-          <div className="flex items-center gap-4 mb-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6 md:mb-8">
             <Button 
               variant="ghost" 
               onClick={() => {
@@ -306,18 +307,38 @@ const FlightSelection = () => {
             </Button>
 
             <div className="flex-grow">
-              <h1 className="text-4xl font-bold mb-2">
+              <h1 className="text-2xl md:text-4xl font-bold mb-2">
                 {step === 'outbound' ? 'Selecione o voo de ida' : 'Selecione o voo de volta'}
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-sm md:text-base text-muted-foreground">
                 {searchParams.get("origin")} → {searchParams.get("destination")}
                 {step === 'return' && selectedOutbound && (
-                  <span className="ml-4 text-primary font-semibold">
-                    Voo de ida selecionado: R$ {parseFloat(selectedOutbound.price.total).toFixed(2)}
+                  <span className="block sm:inline sm:ml-4 text-primary font-semibold mt-1 sm:mt-0">
+                    Voo de ida: R$ {parseFloat(selectedOutbound.price.total).toFixed(2)}
                   </span>
                 )}
               </p>
             </div>
+
+            {/* Mobile Filter Button */}
+            {!loading && (step === 'outbound' ? outboundFlights : returnFlights).length > 0 && (
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="lg" className="lg:hidden w-full sm:w-auto">
+                    <SlidersHorizontal className="w-4 h-4 mr-2" />
+                    Filtros
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-[300px] sm:w-[400px] overflow-y-auto">
+                  <FlightFilters
+                    minPrice={minPrice}
+                    maxPrice={maxPrice}
+                    airlines={uniqueAirlines}
+                    onFilterChange={setFilters}
+                  />
+                </SheetContent>
+              </Sheet>
+            )}
           </div>
 
           <div className="flex gap-6">
@@ -350,13 +371,14 @@ const FlightSelection = () => {
                 <div className="space-y-6">
                   {filteredFlights.map((flight) => (
                     <div key={flight.id} className="relative">
-                      <FlightCard flight={flight} carriers={dictionaries.carriers || {}} />
+                      <FlightCard flight={flight} carriers={dictionaries.carriers || {}} flightType="outbound" />
                       <Button
                         onClick={() => handleSelectOutbound(flight)}
-                        className="absolute bottom-6 right-6"
+                        className="absolute bottom-4 right-4 md:bottom-6 md:right-6"
                         size="lg"
                       >
-                        Selecionar voo de ida
+                        <span className="hidden sm:inline">Selecionar voo de ida</span>
+                        <span className="sm:hidden">Selecionar</span>
                         <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                     </div>
@@ -368,13 +390,14 @@ const FlightSelection = () => {
                 <div className="space-y-6">
                   {filteredFlights.map((flight) => (
                     <div key={flight.id} className="relative">
-                      <FlightCard flight={flight} carriers={dictionaries.carriers || {}} />
+                      <FlightCard flight={flight} carriers={dictionaries.carriers || {}} flightType="return" />
                       <Button
                         onClick={() => handleSelectReturn(flight)}
-                        className="absolute bottom-6 right-6"
+                        className="absolute bottom-4 right-4 md:bottom-6 md:right-6"
                         size="lg"
                       >
-                        Selecionar e finalizar
+                        <span className="hidden sm:inline">Selecionar e finalizar</span>
+                        <span className="sm:hidden">Finalizar</span>
                         <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                     </div>

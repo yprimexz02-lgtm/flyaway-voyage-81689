@@ -6,7 +6,8 @@ import FlightSearchForm from "@/components/FlightSearchForm";
 import FlightCard from "@/components/FlightCard";
 import FlightFilters, { FilterState } from "@/components/FlightFilters";
 import { Button } from "@/components/ui/button";
-import { Loader2, Plane, ArrowLeft } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Loader2, Plane, ArrowLeft, SlidersHorizontal } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -219,7 +220,7 @@ const FlightSearch = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
 
-      <div className="pt-32 pb-20">
+      <div className="pt-20 md:pt-32 pb-20">
         <div className="container mx-auto px-4">
           <Button 
             variant="ghost" 
@@ -229,7 +230,7 @@ const FlightSearch = () => {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Voltar
           </Button>
-          <h1 className="text-4xl font-bold mb-8 text-center">Buscar Voos</h1>
+          <h1 className="text-2xl md:text-4xl font-bold mb-8 text-center">Buscar Voos</h1>
 
           <div className="mb-12">
             <FlightSearchForm />
@@ -243,8 +244,8 @@ const FlightSearch = () => {
           )}
 
           {!loading && flights.length > 0 && (
-            <div className="flex gap-6">
-              {/* Filters Sidebar */}
+            <div className="flex flex-col lg:flex-row gap-6">
+              {/* Desktop Filters Sidebar */}
               <aside className="w-80 flex-shrink-0 hidden lg:block">
                 <div className="sticky top-32">
                   <FlightFilters
@@ -258,14 +259,35 @@ const FlightSearch = () => {
 
               {/* Flight Results */}
               <div className="flex-grow space-y-6">
-                <h2 className="text-2xl font-bold">
-                  {filteredFlights.length} {filteredFlights.length === 1 ? "voo encontrado" : "voos encontrados"}
-                  {filteredFlights.length !== flights.length && (
-                    <span className="text-muted-foreground text-lg ml-2">
-                      (de {flights.length} total)
-                    </span>
-                  )}
-                </h2>
+                {/* Mobile Filter Button & Results Count */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <h2 className="text-xl md:text-2xl font-bold">
+                    {filteredFlights.length} {filteredFlights.length === 1 ? "voo encontrado" : "voos encontrados"}
+                    {filteredFlights.length !== flights.length && (
+                      <span className="text-muted-foreground text-base md:text-lg ml-2">
+                        (de {flights.length} total)
+                      </span>
+                    )}
+                  </h2>
+                  
+                  {/* Mobile Filter Button */}
+                  <Sheet>
+                    <SheetTrigger asChild>
+                      <Button variant="outline" size="lg" className="lg:hidden w-full sm:w-auto">
+                        <SlidersHorizontal className="w-4 h-4 mr-2" />
+                        Filtros
+                      </Button>
+                    </SheetTrigger>
+                    <SheetContent side="left" className="w-[300px] sm:w-[400px] overflow-y-auto">
+                      <FlightFilters
+                        minPrice={minPrice}
+                        maxPrice={maxPrice}
+                        airlines={availableAirlines}
+                        onFilterChange={setFilters}
+                      />
+                    </SheetContent>
+                  </Sheet>
+                </div>
                 
                 {filteredFlights.length > 0 ? (
                   filteredFlights.map((flight) => (
