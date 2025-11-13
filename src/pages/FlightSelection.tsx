@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, ArrowLeft, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import FlightFilters from "@/components/FlightFilters";
 
 interface FlightOffer {
   id: string;
@@ -43,6 +44,14 @@ const FlightSelection = () => {
   const [dictionaries, setDictionaries] = useState<any>({});
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<'outbound' | 'return'>('outbound');
+  const [filters, setFilters] = useState({
+    priceRange: [0, 10000] as [number, number],
+    selectedAirlines: [] as string[],
+    maxStops: null as number | null,
+    departureTimeRange: [] as string[],
+  });
+  const [minPrice, setMinPrice] = useState(0);
+  const [maxPrice, setMaxPrice] = useState(10000);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -99,6 +108,15 @@ const FlightSelection = () => {
 
       setOutboundFlights(flightResults);
       setDictionaries(flightDictionaries);
+
+      // Set initial price range based on results
+      if (flightResults.length > 0) {
+        const min = Math.floor(parseFloat(flightResults[0].price.total));
+        const max = Math.ceil(parseFloat(flightResults[flightResults.length - 1].price.total));
+        setMinPrice(min);
+        setMaxPrice(max);
+        setFilters(prev => ({ ...prev, priceRange: [min, max] }));
+      }
 
       if (flightResults.length > 0) {
         toast({
@@ -158,6 +176,15 @@ const FlightSelection = () => {
 
       setReturnFlights(flightResults);
 
+      // Update price range for return flights
+      if (flightResults.length > 0) {
+        const min = Math.floor(parseFloat(flightResults[0].price.total));
+        const max = Math.ceil(parseFloat(flightResults[flightResults.length - 1].price.total));
+        setMinPrice(min);
+        setMaxPrice(max);
+        setFilters(prev => ({ ...prev, priceRange: [min, max] }));
+      }
+
       if (flightResults.length > 0) {
         toast({
           title: "Voos de volta encontrados!",
@@ -212,6 +239,48 @@ const FlightSelection = () => {
     }
   };
 
+  // Apply filters to flights
+  const filteredFlights = (step === 'outbound' ? outboundFlights : returnFlights).filter(flight => {
+    const price = parseFloat(flight.price.total);
+    if (price < filters.priceRange[0] || price > filters.priceRange[1]) return false;
+
+    // Filter by stops
+    const totalStops = flight.itineraries[0]?.segments.length - 1 || 0;
+    if (filters.maxStops !== null && totalStops > filters.maxStops) return false;
+
+    // Filter by airlines
+    if (filters.selectedAirlines.length > 0) {
+      const flightAirlines = flight.itineraries[0]?.segments.map(s => s.carrierCode) || [];
+      if (!flightAirlines.some(airline => filters.selectedAirlines.includes(airline))) return false;
+    }
+
+    // Filter by departure time
+    if (filters.departureTimeRange.length > 0) {
+      const departureTime = new Date(flight.itineraries[0]?.segments[0]?.departure.at);
+      const hour = departureTime.getHours();
+      const matchesTime = filters.departureTimeRange.some(range => {
+        if (range === 'night') return hour >= 0 && hour < 6;
+        if (range === 'morning') return hour >= 6 && hour < 12;
+        if (range === 'afternoon') return hour >= 12 && hour < 18;
+        if (range === 'evening') return hour >= 18 && hour < 24;
+        return false;
+      });
+      if (!matchesTime) return false;
+    }
+
+    return true;
+  });
+
+  // Get unique airlines from current flights
+  const currentFlights = step === 'outbound' ? outboundFlights : returnFlights;
+  const uniqueAirlines = Array.from(
+    new Set(
+      currentFlights.flatMap(flight => 
+        flight.itineraries[0]?.segments.map(s => s.carrierCode) || []
+      )
+    )
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -251,6 +320,17 @@ const FlightSelection = () => {
             </div>
           </div>
 
+          {!loading && (step === 'outbound' ? outboundFlights : returnFlights).length > 0 && (
+            <div className="mb-8">
+              <FlightFilters
+                minPrice={minPrice}
+                maxPrice={maxPrice}
+                airlines={uniqueAirlines}
+                onFilterChange={setFilters}
+              />
+            </div>
+          )}
+
           {loading && (
             <div className="flex flex-col items-center justify-center py-20">
               <Loader2 className="w-12 h-12 animate-spin text-primary mb-4" />
@@ -260,9 +340,9 @@ const FlightSelection = () => {
             </div>
           )}
 
-          {!loading && step === 'outbound' && outboundFlights.length > 0 && (
+          {!loading && step === 'outbound' && filteredFlights.length > 0 && (
             <div className="space-y-6">
-              {outboundFlights.map((flight) => (
+              {filteredFlights.map((flight) => (
                 <div key={flight.id} className="relative">
                   <FlightCard flight={flight} carriers={dictionaries.carriers || {}} />
                   <Button
@@ -278,9 +358,9 @@ const FlightSelection = () => {
             </div>
           )}
 
-          {!loading && step === 'return' && returnFlights.length > 0 && (
+          {!loading && step === 'return' && filteredFlights.length > 0 && (
             <div className="space-y-6">
-              {returnFlights.map((flight) => (
+              {filteredFlights.map((flight) => (
                 <div key={flight.id} className="relative">
                   <FlightCard flight={flight} carriers={dictionaries.carriers || {}} />
                   <Button
