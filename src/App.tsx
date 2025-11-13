@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import FlightSearch from "./pages/FlightSearch";
 import FlightSelection from "./pages/FlightSelection";
+import BookingForm from "./pages/BookingForm";
 import Packages from "./pages/Packages";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
         <Route path="/buscar-voos" element={<FlightSearch />} />
         <Route path="/selecionar-voos" element={<FlightSelection />} />
+          <Route path="/finalizar-reserva" element={<BookingForm />} />
           <Route path="/cotacao" element={<Cotacao />} />
           <Route path="/pacotes" element={<Packages />} />
           <Route path="/sobre" element={<About />} />

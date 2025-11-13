@@ -218,25 +218,24 @@ const FlightSelection = () => {
   };
 
   const handleSelectReturn = (flight: FlightOffer) => {
-    // Combine outbound and return flights for booking
     if (selectedOutbound) {
-      const combinedFlight = {
-        ...selectedOutbound,
-        itineraries: [...selectedOutbound.itineraries, ...flight.itineraries],
-        price: {
-          total: String(parseFloat(selectedOutbound.price.total) + parseFloat(flight.price.total)),
-          currency: selectedOutbound.price.currency
-        }
-      };
+      const totalPrice = String(parseFloat(selectedOutbound.price.total) + parseFloat(flight.price.total));
       
-      // Navigate to booking page or show booking options
       toast({
         title: "Voos selecionados!",
-        description: "Redirecionando para a página de reserva...",
+        description: "Redirecionando para finalizar a reserva...",
       });
       
-      // Here you would navigate to a booking page with the combined flight
-      console.log("Combined flight:", combinedFlight);
+      navigate("/finalizar-reserva", {
+        state: {
+          flightData: {
+            outbound: selectedOutbound,
+            return: flight,
+            totalPrice,
+            currency: selectedOutbound.price.currency
+          }
+        }
+      });
     }
   };
 
