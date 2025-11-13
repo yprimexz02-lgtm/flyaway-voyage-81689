@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -49,11 +48,6 @@ const FlightFilters = ({ minPrice, maxPrice, airlines, onFilterChange }: FlightF
       : [...departureTimeRange, range];
     setDepartureTimeRange(updated);
     applyFilters({ departureTimeRange: updated });
-  };
-
-  const handlePriceChange = (value: number[]) => {
-    setPriceRange([value[0], value[1]]);
-    applyFilters({ priceRange: [value[0], value[1]] });
   };
 
   const handleMinPriceInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -116,14 +110,6 @@ const FlightFilters = ({ minPrice, maxPrice, airlines, onFilterChange }: FlightF
       <div className="space-y-3">
         <Label>Faixa de Preço</Label>
         <div className="space-y-3">
-          <Slider
-            min={minPrice}
-            max={maxPrice}
-            step={50}
-            value={priceRange}
-            onValueChange={handlePriceChange}
-            className="w-full"
-          />
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
               <Label htmlFor="min-price" className="text-xs text-muted-foreground">

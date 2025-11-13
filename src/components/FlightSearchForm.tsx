@@ -167,7 +167,7 @@ const FlightSearchForm = ({ variant = "page" }: FlightSearchFormProps) => {
         adults: formData.adults,
         travelClass: formData.travelClass,
       });
-      navigate(`/buscar-voos?${params.toString()}`);
+      navigate(`/selecionar-voos?${params.toString()}`);
       setIsSearching(false);
     }, 2000);
   };
