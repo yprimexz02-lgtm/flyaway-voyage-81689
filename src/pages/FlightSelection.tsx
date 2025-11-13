@@ -320,68 +320,76 @@ const FlightSelection = () => {
             </div>
           </div>
 
-          {!loading && (step === 'outbound' ? outboundFlights : returnFlights).length > 0 && (
-            <div className="mb-8">
-              <FlightFilters
-                minPrice={minPrice}
-                maxPrice={maxPrice}
-                airlines={uniqueAirlines}
-                onFilterChange={setFilters}
-              />
-            </div>
-          )}
-
-          {loading && (
-            <div className="flex flex-col items-center justify-center py-20">
-              <Loader2 className="w-12 h-12 animate-spin text-primary mb-4" />
-              <p className="text-muted-foreground">
-                {step === 'outbound' ? 'Buscando voos de ida...' : 'Buscando voos de volta...'}
-              </p>
-            </div>
-          )}
-
-          {!loading && step === 'outbound' && filteredFlights.length > 0 && (
-            <div className="space-y-6">
-              {filteredFlights.map((flight) => (
-                <div key={flight.id} className="relative">
-                  <FlightCard flight={flight} carriers={dictionaries.carriers || {}} />
-                  <Button
-                    onClick={() => handleSelectOutbound(flight)}
-                    className="absolute bottom-6 right-6"
-                    size="lg"
-                  >
-                    Selecionar voo de ida
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
+          <div className="flex gap-6">
+            {/* Filters Sidebar */}
+            {!loading && (step === 'outbound' ? outboundFlights : returnFlights).length > 0 && (
+              <aside className="w-80 flex-shrink-0 hidden lg:block">
+                <div className="sticky top-32">
+                  <FlightFilters
+                    minPrice={minPrice}
+                    maxPrice={maxPrice}
+                    airlines={uniqueAirlines}
+                    onFilterChange={setFilters}
+                  />
                 </div>
-              ))}
-            </div>
-          )}
+              </aside>
+            )}
 
-          {!loading && step === 'return' && filteredFlights.length > 0 && (
-            <div className="space-y-6">
-              {filteredFlights.map((flight) => (
-                <div key={flight.id} className="relative">
-                  <FlightCard flight={flight} carriers={dictionaries.carriers || {}} />
-                  <Button
-                    onClick={() => handleSelectReturn(flight)}
-                    className="absolute bottom-6 right-6"
-                    size="lg"
-                  >
-                    Selecionar e finalizar
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
+            {/* Main Content */}
+            <div className="flex-grow">
+              {loading && (
+                <div className="flex flex-col items-center justify-center py-20">
+                  <Loader2 className="w-12 h-12 animate-spin text-primary mb-4" />
+                  <p className="text-muted-foreground">
+                    {step === 'outbound' ? 'Buscando voos de ida...' : 'Buscando voos de volta...'}
+                  </p>
                 </div>
-              ))}
-            </div>
-          )}
+              )}
 
-          {!loading && step === 'outbound' && outboundFlights.length === 0 && (
-            <div className="text-center py-20">
-              <p className="text-muted-foreground text-lg">Nenhum voo encontrado</p>
-              <p className="text-sm text-muted-foreground mt-2">Tente ajustar seus critérios de busca.</p>
+              {!loading && step === 'outbound' && filteredFlights.length > 0 && (
+                <div className="space-y-6">
+                  {filteredFlights.map((flight) => (
+                    <div key={flight.id} className="relative">
+                      <FlightCard flight={flight} carriers={dictionaries.carriers || {}} />
+                      <Button
+                        onClick={() => handleSelectOutbound(flight)}
+                        className="absolute bottom-6 right-6"
+                        size="lg"
+                      >
+                        Selecionar voo de ida
+                        <ArrowRight className="w-4 h-4 ml-2" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {!loading && step === 'return' && filteredFlights.length > 0 && (
+                <div className="space-y-6">
+                  {filteredFlights.map((flight) => (
+                    <div key={flight.id} className="relative">
+                      <FlightCard flight={flight} carriers={dictionaries.carriers || {}} />
+                      <Button
+                        onClick={() => handleSelectReturn(flight)}
+                        className="absolute bottom-6 right-6"
+                        size="lg"
+                      >
+                        Selecionar e finalizar
+                        <ArrowRight className="w-4 h-4 ml-2" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {!loading && step === 'outbound' && outboundFlights.length === 0 && (
+                <div className="text-center py-20">
+                  <p className="text-muted-foreground text-lg">Nenhum voo encontrado</p>
+                  <p className="text-sm text-muted-foreground mt-2">Tente ajustar seus critérios de busca.</p>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </div>
 

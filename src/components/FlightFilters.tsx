@@ -95,7 +95,7 @@ const FlightFilters = ({ minPrice, maxPrice, airlines, onFilterChange }: FlightF
   const hasActiveFilters = selectedAirlines.length > 0 || maxStops !== null || departureTimeRange.length > 0 || priceRange[0] > minPrice || priceRange[1] < maxPrice;
 
   return (
-    <Card className="p-6 space-y-6 sticky top-24">
+    <Card className="p-6 space-y-6 border-border bg-card">
       <div className="flex items-center justify-between">
         <h3 className="font-semibold text-lg">Filtros</h3>
         {hasActiveFilters && (

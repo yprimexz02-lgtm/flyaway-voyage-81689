@@ -243,19 +243,21 @@ const FlightSearch = () => {
           )}
 
           {!loading && flights.length > 0 && (
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div className="flex gap-6">
               {/* Filters Sidebar */}
-              <div className="lg:col-span-1">
-                <FlightFilters
-                  minPrice={minPrice}
-                  maxPrice={maxPrice}
-                  airlines={availableAirlines}
-                  onFilterChange={setFilters}
-                />
-              </div>
+              <aside className="w-80 flex-shrink-0 hidden lg:block">
+                <div className="sticky top-32">
+                  <FlightFilters
+                    minPrice={minPrice}
+                    maxPrice={maxPrice}
+                    airlines={availableAirlines}
+                    onFilterChange={setFilters}
+                  />
+                </div>
+              </aside>
 
               {/* Flight Results */}
-              <div className="lg:col-span-3 space-y-6">
+              <div className="flex-grow space-y-6">
                 <h2 className="text-2xl font-bold">
                   {filteredFlights.length} {filteredFlights.length === 1 ? "voo encontrado" : "voos encontrados"}
                   {filteredFlights.length !== flights.length && (
