@@ -62,18 +62,14 @@ const FlightCard = ({ flight, carriers, flightType = 'outbound', onSelect, butto
     return `https://images.kiwi.com/airlines/64/${carrierCode}.png`;
   };
 
-  // Preço base da API + taxa de serviço de 3% para igualar ao Google Flights
-  const basePrice = parseFloat(flight.price.total);
-  const serviceFee = basePrice * 0.03;
-  const airlinePriceInBRL = basePrice + serviceFee;
-  
+  // Preço da API já vem completo com todas as taxas incluídas
+  const airlinePriceInBRL = parseFloat(flight.price.total);
   const gfcTravelPrice = airlinePriceInBRL * 0.88; // 12% discount
   
   console.log('Preço calculado:', {
-    precoBaseAPI: basePrice.toFixed(2),
-    taxaServico: serviceFee.toFixed(2),
     precoCompanhia: airlinePriceInBRL.toFixed(2),
-    precoGFC: gfcTravelPrice.toFixed(2)
+    precoGFC: gfcTravelPrice.toFixed(2),
+    economia: (airlinePriceInBRL - gfcTravelPrice).toFixed(2)
   });
 
   return (
