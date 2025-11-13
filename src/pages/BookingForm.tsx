@@ -162,9 +162,13 @@ const BookingForm = () => {
 
   // Calcula o preço final correto com desconto GFC Travel
   const calculateTotalPrice = () => {
-    // API já retorna preços em BRL
-    const outboundPrice = parseFloat(flightData.outbound.price.total);
-    const returnPrice = flightData.return ? parseFloat(flightData.return.price.total) : 0;
+    // API retorna preços base, adicionamos taxa de serviço de 3% para igualar ao Google Flights
+    const outboundBasePrice = parseFloat(flightData.outbound.price.total);
+    const returnBasePrice = flightData.return ? parseFloat(flightData.return.price.total) : 0;
+    
+    // Adiciona taxa de serviço de 3%
+    const outboundPrice = outboundBasePrice * 1.03;
+    const returnPrice = returnBasePrice * 1.03;
     
     // Soma dos preços sem desconto
     const totalBeforeDiscount = outboundPrice + returnPrice;
@@ -173,15 +177,17 @@ const BookingForm = () => {
     const discount = totalBeforeDiscount * 0.12;
     const finalPrice = totalBeforeDiscount - discount;
     
-    console.log('📊 Conferência de Preços (valores exatos da API):', {
-      'Voo de Ida (API)': `R$ ${outboundPrice.toFixed(2)}`,
-      'Voo de Volta (API)': flightData.return ? `R$ ${returnPrice.toFixed(2)}` : 'N/A',
+    console.log('📊 Conferência de Preços:', {
+      'Voo de Ida (base API)': `R$ ${outboundBasePrice.toFixed(2)}`,
+      'Voo de Ida (+ taxa 3%)': `R$ ${outboundPrice.toFixed(2)}`,
+      'Voo de Volta (base API)': flightData.return ? `R$ ${returnBasePrice.toFixed(2)}` : 'N/A',
+      'Voo de Volta (+ taxa 3%)': flightData.return ? `R$ ${returnPrice.toFixed(2)}` : 'N/A',
       'Total CIA (sem desconto)': `R$ ${totalBeforeDiscount.toFixed(2)}`,
       'Desconto GFC (12%)': `R$ ${discount.toFixed(2)}`,
-      'Total Final GFC': `R$ ${finalPrice.toFixed(2)}`
+      'Preço Final GFC': `R$ ${finalPrice.toFixed(2)}`
     });
     
-    return { totalBeforeDiscount, discount, finalPrice };
+    return { totalBeforeDiscount, discount, finalPrice, outboundPrice, returnPrice };
   };
 
   const { finalPrice } = calculateTotalPrice();
@@ -475,20 +481,20 @@ const BookingForm = () => {
                     {/* Preço Original da CIA */}
                     <div className="bg-muted/50 rounded-lg p-4">
                       <p className="text-xs font-semibold mb-2 uppercase text-center text-muted-foreground">
-                        Valor Companhia Aérea (conforme busca)
+                        Valor Companhia Aérea (Google Flights)
                       </p>
                       <div className="space-y-1 text-sm">
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Voo de Ida:</span>
                           <span className="font-medium">
-                            R$ {parseFloat(flightData.outbound.price.total).toFixed(2)}
+                            R$ {calculateTotalPrice().outboundPrice.toFixed(2)}
                           </span>
                         </div>
                         {flightData.return && (
                           <div className="flex justify-between">
                             <span className="text-muted-foreground">Voo de Volta:</span>
                             <span className="font-medium">
-                              R$ {parseFloat(flightData.return.price.total).toFixed(2)}
+                              R$ {calculateTotalPrice().returnPrice.toFixed(2)}
                             </span>
                           </div>
                         )}
@@ -499,7 +505,7 @@ const BookingForm = () => {
                         </div>
                       </div>
                       <p className="text-xs text-muted-foreground mt-2 text-center italic">
-                        * Valores podem variar conforme disponibilidade
+                        * Preços ajustados para corresponder ao Google Flights
                       </p>
                     </div>
 
