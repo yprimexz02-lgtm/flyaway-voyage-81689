@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 
 interface FlightFiltersProps {
+  minPrice: number;
   maxPrice: number;
   airlines: string[];
   onFilterChange: (filters: FilterState) => void;
@@ -21,8 +22,8 @@ export interface FilterState {
   departureTimeRange: string[];
 }
 
-const FlightFilters = ({ maxPrice, airlines, onFilterChange }: FlightFiltersProps) => {
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, maxPrice]);
+const FlightFilters = ({ minPrice, maxPrice, airlines, onFilterChange }: FlightFiltersProps) => {
+  const [priceRange, setPriceRange] = useState<[number, number]>([minPrice, maxPrice]);
   const [selectedAirlines, setSelectedAirlines] = useState<string[]>([]);
   const [maxStops, setMaxStops] = useState<number | null>(null);
   const [departureTimeRange, setDepartureTimeRange] = useState<string[]>([]);
@@ -56,8 +57,8 @@ const FlightFilters = ({ maxPrice, airlines, onFilterChange }: FlightFiltersProp
   };
 
   const handleMinPriceInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value) || 0;
-    const newMin = Math.max(0, Math.min(value, priceRange[1]));
+    const value = parseInt(e.target.value) || minPrice;
+    const newMin = Math.max(minPrice, Math.min(value, priceRange[1]));
     setPriceRange([newMin, priceRange[1]]);
     applyFilters({ priceRange: [newMin, priceRange[1]] });
   };
@@ -85,19 +86,19 @@ const FlightFilters = ({ maxPrice, airlines, onFilterChange }: FlightFiltersProp
   };
 
   const clearAllFilters = () => {
-    setPriceRange([0, maxPrice]);
+    setPriceRange([minPrice, maxPrice]);
     setSelectedAirlines([]);
     setMaxStops(null);
     setDepartureTimeRange([]);
     onFilterChange({
-      priceRange: [0, maxPrice],
+      priceRange: [minPrice, maxPrice],
       selectedAirlines: [],
       maxStops: null,
       departureTimeRange: [],
     });
   };
 
-  const hasActiveFilters = selectedAirlines.length > 0 || maxStops !== null || departureTimeRange.length > 0 || priceRange[0] > 0 || priceRange[1] < maxPrice;
+  const hasActiveFilters = selectedAirlines.length > 0 || maxStops !== null || departureTimeRange.length > 0 || priceRange[0] > minPrice || priceRange[1] < maxPrice;
 
   return (
     <Card className="p-6 space-y-6 sticky top-24">
@@ -116,7 +117,7 @@ const FlightFilters = ({ maxPrice, airlines, onFilterChange }: FlightFiltersProp
         <Label>Faixa de Preço</Label>
         <div className="space-y-3">
           <Slider
-            min={0}
+            min={minPrice}
             max={maxPrice}
             step={50}
             value={priceRange}
@@ -135,7 +136,7 @@ const FlightFilters = ({ maxPrice, airlines, onFilterChange }: FlightFiltersProp
                 <Input
                   id="min-price"
                   type="number"
-                  min={0}
+                  min={minPrice}
                   max={priceRange[1]}
                   value={priceRange[0]}
                   onChange={handleMinPriceInput}
@@ -263,7 +264,7 @@ const FlightFilters = ({ maxPrice, airlines, onFilterChange }: FlightFiltersProp
                 {timeRanges.find((r) => r.value === range)?.label}
               </Badge>
             ))}
-            {(priceRange[0] > 0 || priceRange[1] < maxPrice) && (
+            {(priceRange[0] > minPrice || priceRange[1] < maxPrice) && (
               <Badge variant="secondary">
                 R$ {priceRange[0]} - R$ {priceRange[1]}
               </Badge>
