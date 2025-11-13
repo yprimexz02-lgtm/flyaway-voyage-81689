@@ -290,13 +290,21 @@ const FlightSearch = () => {
                 </div>
                 
                 {filteredFlights.length > 0 ? (
-                  filteredFlights.map((flight) => (
-                    <FlightCard 
-                      key={flight.id} 
-                      flight={flight} 
-                      carriers={dictionaries.carriers || {}} 
-                    />
-                  ))
+                  filteredFlights.map((flight) => {
+                    const isOneWay = !searchParams.get("returnDate");
+                    return (
+                      <FlightCard 
+                        key={flight.id} 
+                        flight={flight} 
+                        carriers={dictionaries.carriers || {}}
+                        isRoundTrip={!isOneWay}
+                        {...(isOneWay && {
+                          onSelect: () => navigate(`/reserva?flightId=${flight.id}`),
+                          buttonLabel: "Reservar"
+                        })}
+                      />
+                    );
+                  })
                 ) : (
                   <div className="text-center py-20">
                     <Plane className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />

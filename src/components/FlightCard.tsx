@@ -168,6 +168,16 @@ const FlightCard = ({ flight, carriers, flightType = 'outbound', onSelect, butto
                 ))}
               </div>
 
+              {/* Stops Badge for this itinerary */}
+              <div className="mt-4">
+                <Badge variant="outline" className="text-primary border-primary/50 w-fit">
+                  {itinerary.segments.length - 1 === 0 
+                    ? "Voo direto" 
+                    : `${itinerary.segments.length - 1} parada${itinerary.segments.length - 1 > 1 ? 's' : ''}`
+                  }
+                </Badge>
+              </div>
+
               {itineraryIndex < flight.itineraries.length - 1 && (
                 <Separator className="my-6" />
               )}
@@ -177,16 +187,6 @@ const FlightCard = ({ flight, carriers, flightType = 'outbound', onSelect, butto
           {/* Flight Info Footer */}
           <div className="mt-6 pt-4 border-t border-border">
             <div className="flex flex-col gap-4">
-              {/* Badges and direct flight info */}
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-                <Badge variant="outline" className="text-primary border-primary/50 w-fit">
-                  {flight.itineraries[0].segments.length - 1 === 0 
-                    ? "Voo direto" 
-                    : `${flight.itineraries[0].segments.length - 1} parada${flight.itineraries[0].segments.length - 1 > 1 ? 's' : ''}`
-                  }
-                </Badge>
-              </div>
-              
               {/* Baggage Policy */}
               <div className="bg-muted/30 rounded-lg p-4 space-y-3">
                 <p className="text-sm font-semibold text-foreground mb-2">Bagagem incluída:</p>
