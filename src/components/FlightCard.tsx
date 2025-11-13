@@ -62,12 +62,19 @@ const FlightCard = ({ flight, carriers, flightType = 'outbound', onSelect, butto
     return `https://images.kiwi.com/airlines/64/${carrierCode}.png`;
   };
 
-  const eurToBrl = 5.85;
-  const airlinePriceInBRL = flight.price.currency === "EUR" 
-    ? parseFloat(flight.price.total) * eurToBrl 
-    : parseFloat(flight.price.total);
+  // Preço base da API + taxa de serviço de 3% para igualar ao Google Flights
+  const basePrice = parseFloat(flight.price.total);
+  const serviceFee = basePrice * 0.03;
+  const airlinePriceInBRL = basePrice + serviceFee;
   
   const gfcTravelPrice = airlinePriceInBRL * 0.88; // 12% discount
+  
+  console.log('Preço calculado:', {
+    precoBaseAPI: basePrice.toFixed(2),
+    taxaServico: serviceFee.toFixed(2),
+    precoCompanhia: airlinePriceInBRL.toFixed(2),
+    precoGFC: gfcTravelPrice.toFixed(2)
+  });
 
   return (
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-primary/30 border border-border bg-card">
@@ -169,12 +176,9 @@ const FlightCard = ({ flight, carriers, flightType = 'outbound', onSelect, butto
 
           {/* Flight Info Footer */}
           <div className="mt-6 pt-4 border-t border-border">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm">
+            <div className="flex flex-col gap-4">
+              {/* Badges and direct flight info */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Briefcase className="w-4 h-4" />
-                  <span>Bagagem de mão incluída</span>
-                </div>
                 <Badge variant="outline" className="text-primary border-primary/50 w-fit">
                   {flight.itineraries[0].segments.length - 1 === 0 
                     ? "Voo direto" 
@@ -182,13 +186,32 @@ const FlightCard = ({ flight, carriers, flightType = 'outbound', onSelect, butto
                   }
                 </Badge>
               </div>
-              <a 
-                href="#" 
-                className="text-primary hover:underline text-xs font-medium"
-                onClick={(e) => e.preventDefault()}
-              >
-                Ver política de bagagem →
-              </a>
+              
+              {/* Baggage Policy */}
+              <div className="bg-muted/30 rounded-lg p-4 space-y-3">
+                <p className="text-sm font-semibold text-foreground mb-2">Bagagem incluída:</p>
+                <div className="space-y-2 text-xs text-muted-foreground">
+                  <div className="flex items-start gap-2">
+                    <Briefcase className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="font-medium text-foreground">1 bolsa ou mochila até 10 kg</p>
+                      <p className="text-xs">Deve ir debaixo do assento da frente</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Briefcase className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="font-medium text-foreground">1 mala pequena até 12 kg</p>
+                      <p className="text-xs">Sujeita a ser despachada no embarque</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="pt-2 border-t border-border/50">
+                  <p className="text-xs text-muted-foreground">
+                    <span className="font-medium text-foreground">Remarcação:</span> Permitida com taxa + diferença de preço
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
