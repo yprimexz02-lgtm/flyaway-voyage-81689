@@ -164,22 +164,37 @@ const BookingForm = () => {
   const calculateTotalPrice = () => {
     const eurToBrl = 5.85;
     
-    // Preço do voo de ida
-    const outboundPrice = flightData.outbound.price.currency === "EUR" 
-      ? parseFloat(flightData.outbound.price.total) * eurToBrl 
-      : parseFloat(flightData.outbound.price.total);
+    // Preço do voo de ida em BRL
+    let outboundPrice = parseFloat(flightData.outbound.price.total);
+    if (flightData.outbound.price.currency === "EUR") {
+      outboundPrice = outboundPrice * eurToBrl;
+    }
     
-    // Preço do voo de volta
-    const returnPrice = flightData.return 
-      ? (flightData.return.price.currency === "EUR" 
-        ? parseFloat(flightData.return.price.total) * eurToBrl 
-        : parseFloat(flightData.return.price.total))
-      : 0;
+    // Preço do voo de volta em BRL
+    let returnPrice = 0;
+    if (flightData.return) {
+      returnPrice = parseFloat(flightData.return.price.total);
+      if (flightData.return.price.currency === "EUR") {
+        returnPrice = returnPrice * eurToBrl;
+      }
+    }
     
-    // Aplica desconto de 12% (0.88)
-    const totalWithDiscount = (outboundPrice + returnPrice) * 0.88;
+    // Soma dos preços sem desconto
+    const totalBeforeDiscount = outboundPrice + returnPrice;
     
-    return totalWithDiscount;
+    // Aplica desconto de 12% da GFC Travel
+    const discount = totalBeforeDiscount * 0.12;
+    const finalPrice = totalBeforeDiscount - discount;
+    
+    console.log('Cálculo de preços:', {
+      outbound: { original: flightData.outbound.price.total, currency: flightData.outbound.price.currency, brl: outboundPrice },
+      return: flightData.return ? { original: flightData.return.price.total, currency: flightData.return.price.currency, brl: returnPrice } : null,
+      totalBeforeDiscount,
+      discount,
+      finalPrice
+    });
+    
+    return finalPrice;
   };
 
   const finalPrice = calculateTotalPrice();
