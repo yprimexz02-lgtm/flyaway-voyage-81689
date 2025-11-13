@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -54,6 +55,20 @@ const FlightFilters = ({ maxPrice, airlines, onFilterChange }: FlightFiltersProp
     applyFilters({ priceRange: [value[0], value[1]] });
   };
 
+  const handleMinPriceInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value) || 0;
+    const newMin = Math.max(0, Math.min(value, priceRange[1]));
+    setPriceRange([newMin, priceRange[1]]);
+    applyFilters({ priceRange: [newMin, priceRange[1]] });
+  };
+
+  const handleMaxPriceInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value) || maxPrice;
+    const newMax = Math.min(maxPrice, Math.max(value, priceRange[0]));
+    setPriceRange([priceRange[0], newMax]);
+    applyFilters({ priceRange: [priceRange[0], newMax] });
+  };
+
   const handleStopsChange = (stops: number | null) => {
     setMaxStops(stops);
     applyFilters({ maxStops: stops });
@@ -98,8 +113,8 @@ const FlightFilters = ({ maxPrice, airlines, onFilterChange }: FlightFiltersProp
 
       {/* Price Range */}
       <div className="space-y-3">
-        <Label>Preço máximo</Label>
-        <div className="space-y-2">
+        <Label>Faixa de Preço</Label>
+        <div className="space-y-3">
           <Slider
             min={0}
             max={maxPrice}
@@ -108,9 +123,45 @@ const FlightFilters = ({ maxPrice, airlines, onFilterChange }: FlightFiltersProp
             onValueChange={handlePriceChange}
             className="w-full"
           />
-          <div className="flex justify-between text-sm text-muted-foreground">
-            <span>R$ {priceRange[0]}</span>
-            <span>R$ {priceRange[1]}</span>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label htmlFor="min-price" className="text-xs text-muted-foreground">
+                Mínimo
+              </Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                  R$
+                </span>
+                <Input
+                  id="min-price"
+                  type="number"
+                  min={0}
+                  max={priceRange[1]}
+                  value={priceRange[0]}
+                  onChange={handleMinPriceInput}
+                  className="pl-9"
+                />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="max-price" className="text-xs text-muted-foreground">
+                Máximo
+              </Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                  R$
+                </span>
+                <Input
+                  id="max-price"
+                  type="number"
+                  min={priceRange[0]}
+                  max={maxPrice}
+                  value={priceRange[1]}
+                  onChange={handleMaxPriceInput}
+                  className="pl-9"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
