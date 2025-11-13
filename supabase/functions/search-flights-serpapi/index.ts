@@ -25,11 +25,31 @@ serve(async (req) => {
       
       const params = new URLSearchParams({
         engine: 'google_flights',
-        departure_token: departure_token,
+        departure_id: origin,
+        arrival_id: destination,
+        outbound_date: departureDate,
+        return_date: returnDate || departureDate,
         currency: 'BRL',
         hl: 'pt-br',
         api_key: apiKey,
+        departure_token: departure_token,
       });
+
+      // Add passengers
+      const totalPassengers = (adults || 1) + (children || 0) + (infants || 0);
+      params.append('adults', String(adults || 1));
+      if (children) params.append('children', String(children));
+      if (infants) params.append('infants_in_seat', String(infants));
+
+      // Add travel class
+      if (travelClass && travelClass !== 'ECONOMY') {
+        const classMap: Record<string, string> = {
+          'PREMIUM_ECONOMY': '2',
+          'BUSINESS': '3',
+          'FIRST': '4'
+        };
+        params.append('travel_class', classMap[travelClass] || '1');
+      }
 
       const serpApiUrl = `https://serpapi.com/search?${params.toString()}`;
       console.log('SerpApi request URL (return flights):', serpApiUrl.replace(apiKey, 'HIDDEN'));

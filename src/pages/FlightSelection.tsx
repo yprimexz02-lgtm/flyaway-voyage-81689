@@ -127,9 +127,19 @@ const FlightSelection = () => {
     setLoading(true);
     setReturnFlights([]);
 
+    const searchData = {
+      departure_token: departureToken,
+      origin: searchParams.get("origin") || "",
+      destination: searchParams.get("destination") || "",
+      departureDate: searchParams.get("departureDate") || "",
+      returnDate: searchParams.get("returnDate") || "",
+      adults: parseInt(searchParams.get("adults") || "1"),
+      travelClass: searchParams.get("travelClass") || "ECONOMY",
+    };
+
     try {
       const { data, error: invokeError } = await supabase.functions.invoke("search-flights-serpapi", {
-        body: { departure_token: departureToken }
+        body: searchData
       });
 
       if (invokeError) throw invokeError;
