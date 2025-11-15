@@ -60,40 +60,21 @@ const Index = () => {
     },
   ];
 
-  const offers = [
-    {
-      destination: "Pacote Paris Romântico",
-      duration: "7 dias / 6 noites",
-      price: "R$ 6.999",
-      description: "Inclui passagem, hotel 4★ e city tour",
-    },
-    {
-      destination: "Caribe All Inclusive",
-      duration: "5 dias / 4 noites",
-      price: "R$ 5.499",
-      description: "Resort all inclusive + transfer",
-    },
-    {
-      destination: "Europa Clássica",
-      duration: "12 dias / 11 noites",
-      price: "R$ 12.999",
-      description: "Paris, Londres e Roma com guia",
-    },
-  ];
-
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Fundo unificado com gradientes sutis */}
+      <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-primary/10 rounded-full blur-3xl opacity-50 -translate-x-1/2 -translate-y-1/2 z-0" />
+      <div className="absolute top-1/2 right-0 w-[600px] h-[600px] bg-accent/10 rounded-full blur-3xl opacity-40 translate-x-1/2 -translate-y-1/2 z-0" />
+      <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-primary/5 rounded-full blur-3xl opacity-60 -translate-x-1/2 translate-y-1/2 z-0" />
+
       <Navigation />
 
       {/* Hero Section */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        {/* Hero image background */}
+      <section className="relative h-screen flex items-center justify-center overflow-hidden z-10">
         <div 
           className="absolute inset-0 bg-cover bg-top"
           style={{ backgroundImage: `url(${heroImage})` }}
         />
-        
-        {/* Dark overlay with blue tint */}
         <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-primary-dark/50 to-background/90" />
         
         <div className="container mx-auto px-4 relative z-10">
@@ -125,19 +106,15 @@ const Index = () => {
       {/* Descubra o Mundo Conosco */}
       <section 
         ref={offersSection.elementRef}
-        className="py-24 relative overflow-hidden"
+        className="py-24 relative z-10"
       >
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
-        
-        <div className="container mx-auto px-4 relative z-10">
+        <div className="container mx-auto px-4">
           <div className={`transition-all duration-1000 ${
             offersSection.isVisible 
               ? "opacity-100 translate-y-0" 
               : "opacity-0 translate-y-10"
           }`}>
             <div className="grid lg:grid-cols-2 gap-12 items-center">
-              {/* Imagem */}
               <div className="order-2 lg:order-1">
                 <img 
                   src={discoverCristo} 
@@ -145,8 +122,6 @@ const Index = () => {
                   className="w-full h-[400px] object-cover rounded-3xl shadow-premium border border-primary/30"
                 />
               </div>
-
-              {/* Texto */}
               <div className="order-1 lg:order-2 space-y-6">
                 <h2 className="text-5xl lg:text-6xl font-bold leading-tight">
                   Descubra o <span className="text-gradient">mundo conosco.</span>
@@ -183,12 +158,9 @@ const Index = () => {
       {/* Destinos Populares */}
       <section 
         ref={destinationsSection.elementRef}
-        className="py-24 relative overflow-hidden"
+        className="py-24 relative z-10"
       >
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
-        
-        <div className="container mx-auto px-4 relative z-10">
+        <div className="container mx-auto px-4">
           <div 
             className={`text-center mb-16 transition-all duration-1000 ${
               destinationsSection.isVisible 
@@ -226,7 +198,6 @@ const Index = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-primary-dark/60 to-transparent opacity-90 group-hover:opacity-95 transition-opacity" />
                 
-                {/* Glass card effect on hover */}
                 <div className="absolute inset-x-4 bottom-4 p-6 rounded-2xl glass-card opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0 border border-primary/40 glow">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2">
@@ -238,7 +209,6 @@ const Index = () => {
                   <p className="text-3xl font-bold text-gradient">{dest.price}</p>
                 </div>
                 
-                {/* Default state */}
                 <div className="absolute bottom-0 left-0 right-0 p-6 text-white group-hover:opacity-0 transition-opacity">
                   <div className="flex items-center gap-2 mb-2">
                     <MapPin className="w-5 h-5" />
@@ -255,11 +225,9 @@ const Index = () => {
       {/* Por que viajar conosco */}
       <section 
         ref={featuresSection.elementRef}
-        className="py-24 relative overflow-hidden bg-muted/20"
+        className="py-24 relative z-10"
       >
-        <div className="absolute top-1/2 right-0 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
-        
-        <div className="container mx-auto px-4 relative z-10">
+        <div className="container mx-auto px-4">
           <div 
             className={`text-center mb-16 transition-all duration-1000 ${
               featuresSection.isVisible 
