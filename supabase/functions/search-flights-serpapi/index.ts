@@ -83,6 +83,7 @@ serve(async (req) => {
           
           return {
             duration: `PT${Math.floor((leg?.duration || 0) / 60)}H${(leg?.duration || 0) % 60}M`,
+            stops: leg.stops,
             segments: (leg?.layovers || []).length > 0 
               ? leg.layovers.map((segment: any) => ({
                   departure: {
@@ -221,6 +222,7 @@ serve(async (req) => {
         
         return {
           duration: `PT${Math.floor((leg?.duration || 0) / 60)}H${(leg?.duration || 0) % 60}M`,
+          stops: leg.stops,
           segments: (leg?.layovers || []).length > 0 
             ? leg.layovers.map((segment: any) => ({
                 departure: {

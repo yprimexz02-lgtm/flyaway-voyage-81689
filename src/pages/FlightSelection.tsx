@@ -31,6 +31,7 @@ interface FlightOffer {
       number: string;
       duration: string;
     }>;
+    stops?: number;
   }>;
   departure_token?: string;
   type?: string;
