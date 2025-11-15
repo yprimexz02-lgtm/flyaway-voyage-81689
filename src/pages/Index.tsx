@@ -106,7 +106,7 @@ const Index = () => {
       {/* Descubra o Mundo Conosco */}
       <section 
         ref={offersSection.elementRef}
-        className="py-24 relative z-10"
+        className="py-20 relative z-10"
       >
         <div className="container mx-auto px-4">
           <div className={`transition-all duration-1000 ${
@@ -158,7 +158,7 @@ const Index = () => {
       {/* Destinos Populares */}
       <section 
         ref={destinationsSection.elementRef}
-        className="py-24 relative z-10"
+        className="py-20 relative z-10"
       >
         <div className="container mx-auto px-4">
           <div 
@@ -225,7 +225,7 @@ const Index = () => {
       {/* Por que viajar conosco */}
       <section 
         ref={featuresSection.elementRef}
-        className="py-24 relative z-10"
+        className="py-20 relative z-10"
       >
         <div className="container mx-auto px-4">
           <div 
