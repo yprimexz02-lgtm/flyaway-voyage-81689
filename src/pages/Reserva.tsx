@@ -15,7 +15,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import parisImage from "@/assets/dest-paris.jpg";
+import parisImage from "@/assets/discover-landmark.jpg";
 import maldivesImage from "@/assets/dest-maldives.jpg";
 import nycImage from "@/assets/dest-nyc.jpg";
 import tokyoImage from "@/assets/dest-tokyo.jpg";

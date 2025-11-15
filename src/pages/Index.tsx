@@ -6,10 +6,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Shield, Award, Clock, HeadphonesIcon, MapPin, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
-import bgForest from "@/assets/bg-forest.png";
+import bgForest from "@/assets/discover-forest.jpg";
 import heroImage from "@/assets/hero-deck.jpg";
-import discoverBeach from "@/assets/discover-beach.jpg";
-import parisImage from "@/assets/dest-paris.jpg";
+import discoverCristo from "@/assets/discover-cristo-redentor.jpg";
+import parisImage from "@/assets/discover-landmark.jpg";
 import maldivesImage from "@/assets/dest-maldives.jpg";
 import nycImage from "@/assets/dest-nyc.jpg";
 import tokyoImage from "@/assets/dest-tokyo.jpg";
@@ -144,8 +144,8 @@ const Index = () => {
               {/* Imagem */}
               <div className="order-2 lg:order-1">
                 <img 
-                  src={discoverBeach} 
-                  alt="Praia paradisíaca" 
+                  src={discoverCristo} 
+                  alt="Cristo Redentor no Rio de Janeiro" 
                   className="w-full h-[400px] object-cover rounded-3xl shadow-premium border border-primary/30"
                 />
               </div>
