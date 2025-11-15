@@ -83,6 +83,9 @@ const FlightCard = ({ flight, carriers, flightType = 'outbound', onSelect, butto
             const stopsText = stops === 0
               ? "Voo direto"
               : `${stops} parada${stops > 1 ? 's' : ''}`;
+            
+            const firstSegment = itinerary.segments[0];
+            const lastSegment = itinerary.segments[itinerary.segments.length - 1];
 
             return (
               <div key={itineraryIndex} className="mb-6 last:mb-0">
@@ -121,55 +124,53 @@ const FlightCard = ({ flight, carriers, flightType = 'outbound', onSelect, butto
                   </div>
                 </div>
 
-                {/* Segments */}
-                <div className="space-y-6">
-                  {itinerary.segments.map((segment, segmentIndex) => (
-                    <div key={segmentIndex}>
-                      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-6">
-                        {/* Departure */}
-                        <div className="text-left">
-                          <p className="text-2xl sm:text-3xl font-bold text-foreground">{formatTime(segment.departure.at)}</p>
-                          <p className="text-lg sm:text-xl font-semibold text-foreground mt-1">{segment.departure.iataCode}</p>
-                          <p className="text-xs sm:text-sm text-muted-foreground mt-1">{formatDate(segment.departure.at)}</p>
-                        </div>
+                {/* Simplified Journey View */}
+                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-6">
+                  {/* Departure */}
+                  <div className="text-left">
+                    <p className="text-2xl sm:text-3xl font-bold text-foreground">{formatTime(firstSegment.departure.at)}</p>
+                    <p className="text-lg sm:text-xl font-semibold text-foreground mt-1">{firstSegment.departure.iataCode}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-1">{formatDate(firstSegment.departure.at)}</p>
+                  </div>
 
-                        {/* Arrow and Duration */}
-                        <div className="flex flex-col items-center min-w-[80px] sm:min-w-[120px]">
-                          <div className="relative w-full">
-                            <div className="absolute inset-0 flex items-center">
-                              <div className="w-full border-t-2 border-border"></div>
-                            </div>
-                            <div className="relative flex justify-center">
-                              <Plane className="w-4 h-4 sm:w-5 sm:h-5 bg-card text-primary rotate-90" />
-                            </div>
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-2 font-medium text-center">{formatDuration(segment.duration)}</p>
-                          <Badge variant="secondary" className="mt-1 text-xs hidden sm:inline-flex">
-                            {segment.carrierCode} {segment.number}
-                          </Badge>
-                        </div>
-
-                        {/* Arrival */}
-                        <div className="text-right">
-                          <p className="text-2xl sm:text-3xl font-bold text-foreground">{formatTime(segment.arrival.at)}</p>
-                          <p className="text-lg sm:text-xl font-semibold text-foreground mt-1">{segment.arrival.iataCode}</p>
-                          <p className="text-xs sm:text-sm text-muted-foreground mt-1">{formatDate(segment.arrival.at)}</p>
-                        </div>
+                  {/* Arrow and Stops Info */}
+                  <div className="flex flex-col items-center min-w-[80px] sm:min-w-[120px]">
+                    <div className="relative w-full">
+                      <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t-2 border-border"></div>
                       </div>
-
-                      {/* Layover info */}
-                      {segmentIndex < itinerary.segments.length - 1 && (
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 py-3 sm:py-4 mt-4 bg-muted/30 rounded-lg">
-                          <Clock className="w-4 h-4 text-muted-foreground" />
-                          <p className="text-xs sm:text-sm text-muted-foreground font-medium text-center">
-                            Conexão em {segment.arrival.iataCode} • 
-                            Espera de {getLayoverDuration(segment.arrival.at, itinerary.segments[segmentIndex + 1].departure.at)}
-                          </p>
-                        </div>
-                      )}
+                      <div className="relative flex justify-center bg-card px-2">
+                        {stops > 0 ? (
+                          <span className="text-xs text-primary font-semibold whitespace-nowrap">Voo com escala</span>
+                        ) : (
+                          <Plane className="w-4 h-4 sm:w-5 sm:h-5 text-primary rotate-90" />
+                        )}
+                      </div>
                     </div>
-                  ))}
+                  </div>
+
+                  {/* Arrival */}
+                  <div className="text-right">
+                    <p className="text-2xl sm:text-3xl font-bold text-foreground">{formatTime(lastSegment.arrival.at)}</p>
+                    <p className="text-lg sm:text-xl font-semibold text-foreground mt-1">{lastSegment.arrival.iataCode}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-1">{formatDate(lastSegment.arrival.at)}</p>
+                  </div>
                 </div>
+
+                {/* Layover details */}
+                {stops > 0 && (
+                  <div className="mt-4 space-y-2">
+                    {itinerary.segments.slice(0, -1).map((segment, index) => (
+                      <div key={index} className="flex items-center justify-center gap-2 py-2 bg-muted/30 rounded-lg">
+                        <Clock className="w-4 h-4 text-muted-foreground" />
+                        <p className="text-xs sm:text-sm text-muted-foreground font-medium text-center">
+                          Conexão em {segment.arrival.iataCode} • 
+                          Espera de {getLayoverDuration(segment.arrival.at, itinerary.segments[index + 1].departure.at)}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
                 {/* Stops Badge for this itinerary */}
                 <div className="mt-4">
