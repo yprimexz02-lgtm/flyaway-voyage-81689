@@ -127,12 +127,8 @@ const Index = () => {
         ref={offersSection.elementRef}
         className="py-24 relative overflow-hidden"
       >
-        {/* Background com blur */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${bgForest})` }}
-        />
-        <div className="absolute inset-0 backdrop-blur-3xl bg-background/90" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
         
         <div className="container mx-auto px-4 relative z-10">
           <div className={`transition-all duration-1000 ${
