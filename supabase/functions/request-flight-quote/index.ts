@@ -128,12 +128,7 @@ Não se preocupe! Vou verificar manualmente com meus fornecedores e te retorno e
     }
 
     const cleanedPhone = telefone.replace(/\D/g, '');
-    let phoneNumber = '55' + cleanedPhone;
-
-    if (phoneNumber.startsWith('55') && phoneNumber.length === 13 && phoneNumber.charAt(4) === '9') {
-      phoneNumber = phoneNumber.substring(0, 4) + phoneNumber.substring(5);
-    }
-
+    const phoneNumber = '55' + cleanedPhone;
     const jid = `${phoneNumber}@s.whatsapp.net`;
 
     let wootsapResponse;
