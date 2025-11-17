@@ -85,7 +85,6 @@ serve(async (req) => {
     }
 
     let whatsappMessage = "";
-    let purchaseLink = "";
 
     const formatDate = (dateStr: string) => {
         const [year, month, day] = dateStr.split('-');
@@ -106,7 +105,7 @@ serve(async (req) => {
 
       const purchaseMessageText = `Olá! Recebi a cotação e gostaria de finalizar a compra da passagem de ${origem} para ${destino} para ${quantidade_pessoas} pessoa(s).`;
       const encodedPurchaseMessage = encodeURIComponent(purchaseMessageText);
-      purchaseLink = `https://wa.me/${agentWhatsAppNumber}?text=${encodedPurchaseMessage}`;
+      const purchaseLink = `https://wa.me/${agentWhatsAppNumber}?text=${encodedPurchaseMessage}`;
 
       whatsappMessage = `Olá, ${nome}! Aqui é o GFC IA da GFC Travel Experience.
 
@@ -116,7 +115,9 @@ Seguem as melhores opções que selecionei para você:
 🌍 Destino: ${destinoCompleto}
 📅 Datas: ${dataIdaFormatada} → ${data_retorno ? dataVoltaFormatada : 'Somente Ida'}
 ✈️ Valor na Companhia Aérea: ${valorOriginalFormatado}
-✨ *Nossa tarifa exclusiva GFC: ${valorComDescontoFormatado}*`;
+✨ *Nossa tarifa exclusiva GFC: ${valorComDescontoFormatado}*
+
+Para comprar, clique aqui: ${purchaseLink}`;
 
     } else {
       const destinoCompleto = `${origem} para ${destino}`;
@@ -129,33 +130,13 @@ Não se preocupe! Vou verificar manualmente com meus fornecedores e te retorno e
 
     const cleanedPhone = telefone.replace(/\D/g, '');
     const phoneNumber = '55' + cleanedPhone;
-    const jid = `${phoneNumber}@c.us`; // Correção: Usando @c.us para chats individuais
+    const jid = `${phoneNumber}@c.us`;
 
-    let wootsapResponse;
-    if (cheapestFlight && purchaseLink) {
-      // Envia mensagem com botão
-      const wootsapUrl = `https://api.wootsap.com/api/v1/send-button-link`;
-      const body = {
-        token: wootsapToken,
-        instance_id: wootsapInstanceId,
-        jid: jid,
-        text: whatsappMessage,
-        button_display_text: "Comprar Agora",
-        button_url: purchaseLink,
-      };
-      console.log("Enviando mensagem com botão via Wootsap...");
-      wootsapResponse = await fetch(wootsapUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-    } else {
-      // Envia mensagem de texto simples
-      const encodedMsg = encodeURIComponent(whatsappMessage);
-      const wootsapUrl = `https://api.wootsap.com/api/v1/send-text?token=${wootsapToken}&instance_id=${wootsapInstanceId}&jid=${jid}&msg=${encodedMsg}`;
-      console.log("Enviando mensagem de texto simples via Wootsap...");
-      wootsapResponse = await fetch(wootsapUrl, { method: 'GET' });
-    }
+    const encodedMsg = encodeURIComponent(whatsappMessage);
+    const wootsapUrl = `https://api.wootsap.com/api/v1/send-text?token=${wootsapToken}&instance_id=${wootsapInstanceId}&jid=${jid}&msg=${encodedMsg}`;
+    
+    console.log("Enviando mensagem de texto simples via Wootsap...");
+    const wootsapResponse = await fetch(wootsapUrl, { method: 'GET' });
 
     const wootsapResult = await wootsapResponse.json();
     console.log("Status da resposta da Wootsap:", wootsapResponse.status);
