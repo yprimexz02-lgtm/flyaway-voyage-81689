@@ -129,7 +129,7 @@ Não se preocupe! Vou verificar manualmente com meus fornecedores e te retorno e
 
     const cleanedPhone = telefone.replace(/\D/g, '');
     const phoneNumber = '55' + cleanedPhone;
-    const jid = `${phoneNumber}@s.whatsapp.net`;
+    const jid = `${phoneNumber}@c.us`; // Correção: Usando @c.us para chats individuais
 
     let wootsapResponse;
     if (cheapestFlight && purchaseLink) {
