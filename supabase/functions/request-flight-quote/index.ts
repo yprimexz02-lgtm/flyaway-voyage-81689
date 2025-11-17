@@ -42,9 +42,9 @@ serve(async (req) => {
     });
 
     const {
-      nome, telefone, origem, destino, data_partida, data_retorno, somente_ida, quantidade_pessoas
+      telefone, origem, destino, data_partida, data_retorno, somente_ida, quantidade_pessoas
     } = await req.json();
-    console.log("Dados da solicitação recebidos:", { nome, telefone, origem, destino, data_partida });
+    console.log("Dados da solicitação recebidos:", { telefone, origem, destino, data_partida });
 
     console.log("Buscando voos na SerpApi...");
     const params = new URLSearchParams({
@@ -115,7 +115,7 @@ O que acha? Posso te ajudar a finalizar a reserva.`;
 
     } else {
       const destinoCompleto = `${origem} para ${destino}`;
-      whatsappMessage = `Olá, ${nome}! Aqui é o GFC IA da GFC Travel Experience.
+      whatsappMessage = `Olá! Aqui é o GFC IA da GFC Travel Experience.
 
 Busquei por voos de ${destinoCompleto}, mas não encontrei opções online para essa data. 
 
@@ -140,7 +140,6 @@ Não se preocupe! Vou verificar manualmente com meus fornecedores e te retorno e
 
     console.log("Salvando cotação na tabela 'quote_requests'...");
     const { error: dbError } = await supabaseAdmin.from('quote_requests').insert({
-      nome: nome,
       telefone: telefone,
       origem: origem,
       destino: destino,

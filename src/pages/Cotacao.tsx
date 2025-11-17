@@ -18,7 +18,6 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
-  nome: z.string().trim().min(2, { message: "Nome deve ter pelo menos 2 caracteres" }).max(100),
   telefone: z.string().trim().min(14, { message: "Telefone inválido. Use: (00) 00000-0000" }).max(15),
   origem: z.string().trim().length(3, { message: "Selecione uma cidade da lista" }),
   destino: z.string().trim().length(3, { message: "Selecione uma cidade da lista" }),
@@ -63,7 +62,6 @@ const Cotacao = () => {
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nome: "",
       telefone: "",
       origem: "",
       destino: "",
@@ -104,7 +102,6 @@ const Cotacao = () => {
     setIsSubmitting(true);
     try {
       const payload = {
-        nome: data.nome,
         telefone: data.telefone,
         origem: data.origem,
         destino: data.destino,
@@ -193,10 +190,7 @@ const Cotacao = () => {
             <CardContent>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormField control={form.control} name="nome" render={({ field }) => (<FormItem><FormLabel>Nome Completo *</FormLabel><FormControl><Input placeholder="Seu nome" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                    <FormField control={form.control} name="telefone" render={({ field }) => (<FormItem><FormLabel>WhatsApp *</FormLabel><FormControl><Input placeholder="(00) 00000-0000" {...field} onChange={e => field.onChange(formatPhone(e.target.value))} maxLength={15} /></FormControl><FormMessage /></FormItem>)} />
-                  </div>
+                  <FormField control={form.control} name="telefone" render={({ field }) => (<FormItem><FormLabel>WhatsApp *</FormLabel><FormControl><Input placeholder="(00) 00000-0000" {...field} onChange={e => field.onChange(formatPhone(e.target.value))} maxLength={15} /></FormControl><FormMessage /></FormItem>)} />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <FormField control={form.control} name="origem" render={() => (<FormItem ref={originRef}><FormLabel>Cidade de Origem *</FormLabel><FormControl><div className="relative"><Input placeholder="Digite a cidade de origem" value={originSearch} onChange={e => { setOriginSearch(e.target.value); setShowOriginSuggestions(true); form.setValue('origem', ''); }} onFocus={() => setShowOriginSuggestions(true)} /><div className="absolute z-50 w-full mt-1 bg-popover border rounded-lg shadow-lg max-h-60 overflow-auto">{showOriginSuggestions && originSearch && filteredOriginCities.map(c => (<button key={c.code} type="button" onClick={() => selectOrigin(c)} className="w-full px-4 py-3 text-left hover:bg-accent transition-colors flex items-center gap-2"><Plane className="w-4 h-4 text-muted-foreground" /><span className="font-medium">{c.name}</span><span className="text-sm text-muted-foreground">({c.code})</span></button>))}</div></div></FormControl><FormMessage /></FormItem>)} />
                     <FormField control={form.control} name="destino" render={() => (<FormItem ref={destinationRef}><FormLabel>Cidade de Destino *</FormLabel><FormControl><div className="relative"><Input placeholder="Digite a cidade de destino" value={destinationSearch} onChange={e => { setDestinationSearch(e.target.value); setShowDestinationSuggestions(true); form.setValue('destino', ''); }} onFocus={() => setShowDestinationSuggestions(true)} /><div className="absolute z-50 w-full mt-1 bg-popover border rounded-lg shadow-lg max-h-60 overflow-auto">{showDestinationSuggestions && destinationSearch && filteredDestinationCities.map(c => (<button key={c.code} type="button" onClick={() => selectDestination(c)} className="w-full px-4 py-3 text-left hover:bg-accent transition-colors flex items-center gap-2"><Plane className="w-4 h-4 text-muted-foreground" /><span className="font-medium">{c.name}</span><span className="text-sm text-muted-foreground">({c.code})</span></button>))}</div></div></FormControl><FormMessage /></FormItem>)} />
