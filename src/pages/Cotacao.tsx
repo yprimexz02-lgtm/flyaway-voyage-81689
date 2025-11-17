@@ -116,7 +116,10 @@ const Cotacao = () => {
       };
 
       const { data: functionData, error } = await supabase.functions.invoke("request-flight-quote", {
-        body: payload,
+        body: JSON.stringify(payload),
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
 
       if (error) {
