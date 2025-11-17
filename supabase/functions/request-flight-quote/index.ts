@@ -26,7 +26,6 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-    // Log de depuração para a chave da API
     console.log("Chave SerpApi lida:", serpApiKey ? `${serpApiKey.substring(0, 4)}...${serpApiKey.slice(-4)}` : "Não encontrada");
 
     if (!serpApiKey || !wootsapToken || !wootsapInstanceId || !supabaseUrl || !supabaseServiceRoleKey) {
@@ -51,7 +50,7 @@ serve(async (req) => {
       engine: 'google_flights',
       departure_id: origem,
       arrival_id: destino,
-      outbound_date: data_partida, // Agora recebe YYYY-MM-DD diretamente
+      outbound_date: data_partida,
       currency: 'BRL',
       hl: 'pt-br',
       api_key: serpApiKey,
@@ -59,7 +58,7 @@ serve(async (req) => {
     });
 
     if (!somente_ida && data_retorno) {
-      params.append('return_date', data_retorno); // Agora recebe YYYY-MM-DD diretamente
+      params.append('return_date', data_retorno);
       params.append('type', '1');
     } else {
       params.append('type', '2');
@@ -84,7 +83,7 @@ serve(async (req) => {
     }
 
     let whatsappMessage = "";
-    const formatDate = (dateStr: string) => { // dateStr é YYYY-MM-DD
+    const formatDate = (dateStr: string) => {
         const [year, month, day] = dateStr.split('-');
         return `${day}/${month}/${year}`;
     };
@@ -122,7 +121,11 @@ Busquei por voos de ${destinoCompleto}, mas não encontrei opções online para 
 Não se preocupe! Vou verificar manualmente com meus fornecedores e te retorno em breve com as melhores alternativas.`;
     }
 
-    const cleanPhoneNumber = telefone.replace(/\D/g, '');
+    let cleanPhoneNumber = telefone.replace(/\D/g, '');
+    if (cleanPhoneNumber.length === 10 || cleanPhoneNumber.length === 11) {
+      cleanPhoneNumber = '55' + cleanPhoneNumber;
+    }
+
     const jid = `${cleanPhoneNumber}@s.whatsapp.net`;
     const encodedMsg = encodeURIComponent(whatsappMessage);
 
