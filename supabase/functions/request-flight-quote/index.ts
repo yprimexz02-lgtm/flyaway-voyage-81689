@@ -6,7 +6,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Helper to format BRL currency
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
@@ -20,15 +19,22 @@ serve(async (req) => {
   }
 
   try {
-    // 1. Get secrets and initialize clients
+    // 1. Check for secrets and initialize clients
     const serpApiKey = Deno.env.get('SERPAPI_API_KEY');
     const wootsapToken = Deno.env.get('WOOTSAP_API_TOKEN');
     const wootsapInstanceId = Deno.env.get('WOOTSAP_INSTANCE_ID');
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-    if (!serpApiKey || !wootsapToken || !wootsapInstanceId || !supabaseUrl || !supabaseServiceRoleKey) {
-      throw new Error('Missing required environment variables/secrets.');
+    const missingSecrets = [];
+    if (!serpApiKey) missingSecrets.push('SERPAPI_API_KEY');
+    if (!wootsapToken) missingSecrets.push('WOOTSAP_API_TOKEN');
+    if (!wootsapInstanceId) missingSecrets.push('WOOTSAP_INSTANCE_ID');
+    if (!supabaseUrl) missingSecrets.push('SUPABASE_URL');
+    if (!supabaseServiceRoleKey) missingSecrets.push('SUPABASE_SERVICE_ROLE_KEY');
+
+    if (missingSecrets.length > 0) {
+      throw new Error(`Segredos ausentes no projeto Supabase: ${missingSecrets.join(', ')}`);
     }
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey);
@@ -41,7 +47,7 @@ serve(async (req) => {
       engine: 'google_flights',
       departure_id: origem,
       arrival_id: destino,
-      outbound_date: data_partida.substring(0, 10), // YYYY-MM-DD
+      outbound_date: data_partida.substring(0, 10),
       currency: 'BRL',
       hl: 'pt-br',
       api_key: serpApiKey,
@@ -50,16 +56,16 @@ serve(async (req) => {
 
     if (!somente_ida && data_retorno) {
       params.append('return_date', data_retorno.substring(0, 10));
-      params.append('type', '1'); // Round trip
+      params.append('type', '1');
     } else {
-      params.append('type', '2'); // One way
+      params.append('type', '2');
     }
 
     const serpApiUrl = `https://serpapi.com/search?${params.toString()}`;
     const serpApiResponse = await fetch(serpApiUrl);
 
     if (!serpApiResponse.ok) {
-      throw new Error(`SerpApi request failed with status: ${serpApiResponse.status}`);
+      throw new Error(`A busca de voos falhou com status: ${serpApiResponse.status}`);
     }
 
     const flightData = await serpApiResponse.json();
@@ -84,7 +90,7 @@ serve(async (req) => {
       const periodo = data_retorno ? `${dataIdaFormatada} a ${dataVoltaFormatada}` : `a partir de ${dataIdaFormatada}`;
       
       const valorOriginal = cheapestFlight.price;
-      const valorComDesconto = valorOriginal * 0.94; // Applying 6% discount
+      const valorComDesconto = valorOriginal * 0.94;
 
       const valorOriginalFormatado = formatCurrency(valorOriginal);
       const valorComDescontoFormatado = formatCurrency(valorComDesconto);
@@ -117,10 +123,8 @@ Não se preocupe! Vou verificar manualmente com meus fornecedores e te retorno e
     const wootsapUrl = `https://api.wootsap.com/api/v1/send-text?token=${wootsapToken}&instance_id=${wootsapInstanceId}&jid=${jid}&msg=${encodedMsg}`;
     
     const wootsapResponse = await fetch(wootsapUrl, { method: 'GET' });
-    const wootsapResult = await wootsapResponse.json();
-
-    if (!wootsapResponse.ok || !wootsapResult.success) {
-      console.error("Wootsap API Error:", wootsapResult);
+    if (!wootsapResponse.ok) {
+      console.error("Wootsap API Error:", await wootsapResponse.text());
     }
 
     // 4. Save the quote request to the database
@@ -139,7 +143,7 @@ Não se preocupe! Vou verificar manualmente com meus fornecedores e te retorno e
     });
 
     if (dbError) {
-      throw new Error(`Database insert failed: ${dbError.message}`);
+      throw new Error(`Falha ao salvar no banco de dados: ${dbError.message}`);
     }
 
     // 5. Return success response
