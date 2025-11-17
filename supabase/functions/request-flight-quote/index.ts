@@ -26,6 +26,9 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
+    // Log de depuração para a chave da API
+    console.log("Chave SerpApi lida:", serpApiKey ? `${serpApiKey.substring(0, 4)}...${serpApiKey.slice(-4)}` : "Não encontrada");
+
     if (!serpApiKey || !wootsapToken || !wootsapInstanceId || !supabaseUrl || !supabaseServiceRoleKey) {
       throw new Error(`Um ou mais segredos de ambiente não estão configurados.`);
     }
