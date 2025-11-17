@@ -123,7 +123,7 @@ Não se preocupe! Vou verificar manualmente com meus fornecedores e te retorno e
     }
 
     const cleanPhoneNumber = telefone.replace(/\D/g, '');
-    const jid = `55${cleanPhoneNumber}@s.whatsapp.net`;
+    const jid = `${cleanPhoneNumber}@s.whatsapp.net`;
     const encodedMsg = encodeURIComponent(whatsappMessage);
 
     const wootsapUrl = `https://api.wootsap.com/api/v1/send-text?token=${wootsapToken}&instance_id=${wootsapInstanceId}&jid=${jid}&msg=${encodedMsg}`;
