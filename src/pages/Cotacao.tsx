@@ -16,7 +16,6 @@ import { ptBR } from "date-fns/locale";
 import { CalendarIcon, Loader2, Send, Plane } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/integrations/supabase/client";
 
 const formSchema = z.object({
   nome: z.string().trim().min(2, { message: "Nome deve ter pelo menos 2 caracteres" }).max(100),
@@ -115,14 +114,30 @@ const Cotacao = () => {
         quantidade_pessoas: data.quantidade_pessoas,
       };
 
-      // Let the Supabase client handle the serialization and headers automatically.
-      const { data: functionData, error } = await supabase.functions.invoke("request-flight-quote", {
-        body: payload,
-      });
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
-      if (error) {
-        throw error;
+      const response = await fetch(
+        "https://rsrkdrdkqpdoxlymvgwi.supabase.co/functions/v1/request-flight-quote",
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': supabaseAnonKey,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (!response.ok) {
+        try {
+          const errorBody = await response.json();
+          throw new Error(errorBody.message || `Erro na requisição: ${response.statusText}`);
+        } catch (e) {
+          throw new Error(`Erro na requisição: ${response.status} ${response.statusText}`);
+        }
       }
+
+      const functionData = await response.json();
 
       if (functionData && !functionData.success) {
         throw new Error(functionData.message || "A função de cotação retornou um erro.");
