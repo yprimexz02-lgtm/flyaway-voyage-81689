@@ -119,26 +119,27 @@ Busquei por voos de ${destinoCompleto}, mas não encontrei opções online para 
 Não se preocupe! Vou verificar manualmente com meus fornecedores e te retorno em breve com as melhores alternativas.`;
     }
 
-    const jid = `${telefone}@s.whatsapp.net`;
+    let phoneNumber = telefone;
+    // Verifica se é um número de celular brasileiro (55 + DDD + 9 + 8 dígitos = 13 dígitos)
+    if (phoneNumber.startsWith('55') && phoneNumber.length === 13 && phoneNumber.charAt(4) === '9') {
+      console.log(`Número ${phoneNumber} identificado como celular brasileiro. Removendo o nono dígito.`);
+      const countryCode = phoneNumber.substring(0, 2); // "55"
+      const ddd = phoneNumber.substring(2, 4);       // "31"
+      const numberPart = phoneNumber.substring(5);   // "86858447"
+      phoneNumber = countryCode + ddd + numberPart;
+      console.log(`Número transformado para: ${phoneNumber}`);
+    }
+
+    const jid = `${phoneNumber}@s.whatsapp.net`;
     const encodedMsg = encodeURIComponent(whatsappMessage);
     const wootsapUrl = `https://api.wootsap.com/api/v1/send-text?token=${wootsapToken}&instance_id=${wootsapInstanceId}&jid=${jid}&msg=${encodedMsg}`;
     
-    // --- LOGS DE DIAGNÓSTICO ---
-    console.log("--- INÍCIO DO DIAGNÓSTICO WOOTSAP ---");
-    console.log("Telefone recebido do formulário:", telefone);
-    console.log("JID construído para a API:", jid);
-    console.log("URL da Wootsap (sem token):", `https://api.wootsap.com/api/v1/send-text?instance_id=${wootsapInstanceId}&jid=${jid}&msg=...`);
-    // -------------------------
-
-    console.log("Enviando mensagem via Wootsap...");
+    console.log("Enviando mensagem via Wootsap para o JID:", jid);
     const wootsapResponse = await fetch(wootsapUrl, { method: 'GET' });
     const wootsapResult = await wootsapResponse.json();
 
-    // --- LOGS DE DIAGNÓSTICO ---
     console.log("Status da resposta da Wootsap:", wootsapResponse.status);
     console.log("Corpo da resposta da Wootsap:", JSON.stringify(wootsapResult, null, 2));
-    console.log("--- FIM DO DIAGNÓSTICO WOOTSAP ---");
-    // -------------------------
 
     if (!wootsapResponse.ok || !wootsapResult.success) {
       console.error("Erro na API Wootsap:", wootsapResult);
