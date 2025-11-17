@@ -138,20 +138,17 @@ Não se preocupe! Vou verificar manualmente com meus fornecedores e te retorno e
     }
     console.log("Mensagem enviada com sucesso via Wootsap.");
 
-    // 4. Save the quote request to the database
-    console.log("Salvando cotação no banco de dados...");
-    const { error: dbError } = await supabaseAdmin.from('bookings').insert({
-      destination_id: `${origem}-${destino}`,
-      destination_name: `Cotação: ${origem} para ${destino}`,
-      full_name: nome,
-      cpf: '000.000.000-00',
-      email: `${cleanPhoneNumber}@placeholder.user`,
-      phone: telefone,
-      adults: quantidade_pessoas,
-      children: 0,
-      departure_date: data_partida,
-      return_date: somente_ida ? null : data_retorno,
-      total_price: cheapestFlight ? cheapestFlight.price : 0,
+    // 4. Save the quote request to the new 'quote_requests' table
+    console.log("Salvando cotação na tabela 'quote_requests'...");
+    const { error: dbError } = await supabaseAdmin.from('quote_requests').insert({
+      nome: nome,
+      telefone: telefone,
+      origem: origem,
+      destino: destino,
+      data_partida: data_partida,
+      data_retorno: somente_ida ? null : data_retorno,
+      somente_ida: somente_ida,
+      quantidade_pessoas: quantidade_pessoas,
     });
 
     if (dbError) {
