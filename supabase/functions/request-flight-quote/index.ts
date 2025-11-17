@@ -14,13 +14,11 @@ const formatCurrency = (value: number) => {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // 1. Check for secrets and initialize clients
     console.log("Iniciando função de cotação...");
     const serpApiKey = Deno.env.get('SERPAPI_API_KEY');
     const wootsapToken = Deno.env.get('WOOTSAP_API_TOKEN');
@@ -28,30 +26,22 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-    const missingSecrets = [];
-    if (!serpApiKey) missingSecrets.push('SERPAPI_API_KEY');
-    if (!wootsapToken) missingSecrets.push('WOOTSAP_API_TOKEN');
-    if (!wootsapInstanceId) missingSecrets.push('WOOTSAP_INSTANCE_ID');
-    if (!supabaseUrl) missingSecrets.push('SUPABASE_URL');
-    if (!supabaseServiceRoleKey) missingSecrets.push('SUPABASE_SERVICE_ROLE_KEY');
-
-    if (missingSecrets.length > 0) {
-      throw new Error(`Segredos ausentes no projeto Supabase: ${missingSecrets.join(', ')}`);
+    if (!serpApiKey || !wootsapToken || !wootsapInstanceId || !supabaseUrl || !supabaseServiceRoleKey) {
+      throw new Error(`Um ou mais segredos de ambiente não estão configurados.`);
     }
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey);
     const {
       nome, telefone, origem, destino, data_partida, data_retorno, somente_ida, quantidade_pessoas
     } = await req.json();
-    console.log("Dados da solicitação recebidos:", { nome, telefone, origem, destino });
+    console.log("Dados da solicitação recebidos:", { nome, telefone, origem, destino, data_partida });
 
-    // 2. Search for flights using SerpApi
     console.log("Buscando voos na SerpApi...");
     const params = new URLSearchParams({
       engine: 'google_flights',
       departure_id: origem,
       arrival_id: destino,
-      outbound_date: data_partida.substring(0, 10),
+      outbound_date: data_partida, // Agora recebe YYYY-MM-DD diretamente
       currency: 'BRL',
       hl: 'pt-br',
       api_key: serpApiKey,
@@ -59,7 +49,7 @@ serve(async (req) => {
     });
 
     if (!somente_ida && data_retorno) {
-      params.append('return_date', data_retorno.substring(0, 10));
+      params.append('return_date', data_retorno); // Agora recebe YYYY-MM-DD diretamente
       params.append('type', '1');
     } else {
       params.append('type', '2');
@@ -83,10 +73,9 @@ serve(async (req) => {
       cheapestFlight = allFlights.reduce((min, flight) => flight.price < min.price ? flight : min, allFlights[0]);
     }
 
-    // 3. Format and send WhatsApp message
     let whatsappMessage = "";
-    const formatDate = (dateStr: string) => {
-        const [year, month, day] = dateStr.split('T')[0].split('-');
+    const formatDate = (dateStr: string) => { // dateStr é YYYY-MM-DD
+        const [year, month, day] = dateStr.split('-');
         return `${day}/${month}/${year}`;
     };
 
@@ -139,7 +128,6 @@ Não se preocupe! Vou verificar manualmente com meus fornecedores e te retorno e
     }
     console.log("Mensagem enviada com sucesso via Wootsap.");
 
-    // 4. Save the quote request to the new 'quote_requests' table
     console.log("Salvando cotação na tabela 'quote_requests'...");
     const { error: dbError } = await supabaseAdmin.from('quote_requests').insert({
       nome: nome,
@@ -153,11 +141,11 @@ Não se preocupe! Vou verificar manualmente com meus fornecedores e te retorno e
     });
 
     if (dbError) {
-      throw new Error(`Falha ao salvar no banco de dados: ${dbError.message}`);
+      console.error("Erro ao salvar cotação no Supabase:", dbError);
+      throw new Error(`Falha ao registrar a cotação no banco de dados: ${dbError.message}`);
     }
     console.log("Cotação salva com sucesso.");
 
-    // 5. Return success response
     return new Response(JSON.stringify({ success: true, message: "Quote request processed successfully." }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,

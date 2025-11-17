@@ -104,14 +104,13 @@ const Cotacao = () => {
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     try {
-      // Explicitly construct the payload to ensure only pure, serializable data is sent.
       const payload = {
         nome: data.nome,
         telefone: data.telefone,
         origem: data.origem,
         destino: data.destino,
-        data_partida: format(data.data_partida, "yyyy-MM-dd'T'HH:mm:ss.SSSxxx"),
-        data_retorno: data.somente_ida || !data.data_retorno ? null : format(data.data_retorno, "yyyy-MM-dd'T'HH:mm:ss.SSSxxx"),
+        data_partida: format(data.data_partida, "yyyy-MM-dd"),
+        data_retorno: data.somente_ida || !data.data_retorno ? null : format(data.data_retorno, "yyyy-MM-dd"),
         somente_ida: data.somente_ida,
         quantidade_pessoas: data.quantidade_pessoas,
       };
