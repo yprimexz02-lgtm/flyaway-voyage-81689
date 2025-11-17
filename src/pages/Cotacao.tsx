@@ -115,11 +115,9 @@ const Cotacao = () => {
         quantidade_pessoas: data.quantidade_pessoas,
       };
 
+      // Let the Supabase client handle the serialization and headers automatically.
       const { data: functionData, error } = await supabase.functions.invoke("request-flight-quote", {
-        body: JSON.stringify(payload),
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        body: payload,
       });
 
       if (error) {
