@@ -104,7 +104,6 @@ const Cotacao = () => {
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     try {
-      // Format dates to ISO string for the function
       const payload = {
         ...data,
         data_partida: format(data.data_partida, "yyyy-MM-dd"),
@@ -128,9 +127,10 @@ const Cotacao = () => {
       setDestinationSearch("");
     } catch (error) {
       console.error("Erro ao processar cotação:", error);
+      const errorMessage = error instanceof Error ? error.message : "Ocorreu um erro desconhecido.";
       toast({
-        title: "Erro ao Enviar",
-        description: "Não foi possível processar sua solicitação. Por favor, tente novamente mais tarde.",
+        title: "Erro ao Enviar Solicitação",
+        description: `Detalhe: ${errorMessage}`,
         variant: "destructive",
       });
     } finally {
