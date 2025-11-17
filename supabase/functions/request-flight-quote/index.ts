@@ -25,9 +25,13 @@ serve(async (req) => {
     const wootsapInstanceId = Deno.env.get('WOOTSAP_INSTANCE_ID');
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    const agentWhatsAppNumber = Deno.env.get('AGENT_WHATSAPP_NUMBER');
 
     if (!serpApiKey || !wootsapToken || !wootsapInstanceId || !supabaseUrl || !supabaseServiceRoleKey) {
       throw new Error(`Um ou mais segredos de ambiente não estão configurados.`);
+    }
+    if (!agentWhatsAppNumber) {
+      throw new Error(`O segredo 'AGENT_WHATSAPP_NUMBER' não está configurado. Adicione o número do agente nas configurações do Supabase.`);
     }
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
@@ -98,6 +102,10 @@ serve(async (req) => {
       const valorOriginalFormatado = formatCurrency(valorOriginal);
       const valorComDescontoFormatado = formatCurrency(valorComDesconto);
 
+      const purchaseMessage = `Olá! Recebi a cotação e gostaria de finalizar a compra da passagem de ${origem} para ${destino} para ${quantidade_pessoas} pessoa(s).`;
+      const encodedPurchaseMessage = encodeURIComponent(purchaseMessage);
+      const purchaseLink = `https://wa.me/${agentWhatsAppNumber}?text=${encodedPurchaseMessage}`;
+
       whatsappMessage = `Olá, ${nome}! Aqui é o GFC IA da GFC Travel Experience.
 
 Sua cotação para ${destinoCompleto}, no período de ${periodo}, já está pronta!
@@ -108,7 +116,8 @@ Seguem as melhores opções que selecionei para você:
 ✈️ Valor na Companhia Aérea: ${valorOriginalFormatado}
 ✨ *Nossa tarifa exclusiva GFC: ${valorComDescontoFormatado}*
 
-O que acha? Posso te ajudar a finalizar a reserva.`;
+*Para finalizar a compra, clique aqui:*
+${purchaseLink}`;
 
     } else {
       const destinoCompleto = `${origem} para ${destino}`;
