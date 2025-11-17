@@ -110,8 +110,8 @@ const Cotacao = () => {
         telefone: data.telefone,
         origem: data.origem,
         destino: data.destino,
-        data_partida: format(data.data_partida, "yyyy-MM-dd"),
-        data_retorno: data.somente_ida || !data.data_retorno ? null : format(data.data_retorno, "yyyy-MM-dd"),
+        data_partida: format(data.data_partida, "yyyy-MM-dd'T'HH:mm:ss.SSSxxx"),
+        data_retorno: data.somente_ida || !data.data_retorno ? null : format(data.data_retorno, "yyyy-MM-dd'T'HH:mm:ss.SSSxxx"),
         somente_ida: data.somente_ida,
         quantidade_pessoas: data.quantidade_pessoas,
       };
@@ -120,12 +120,10 @@ const Cotacao = () => {
         body: payload,
       });
 
-      // Handle network errors from the invoke call itself
       if (error) {
         throw error;
       }
 
-      // Handle application-level errors returned from the function
       if (functionData && !functionData.success) {
         throw new Error(functionData.message || "A função de cotação retornou um erro.");
       }
