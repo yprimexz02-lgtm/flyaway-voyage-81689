@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -30,7 +30,14 @@ serve(async (req) => {
       throw new Error(`Um ou mais segredos de ambiente não estão configurados.`);
     }
 
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey);
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+      }
+    });
+
     const {
       nome, telefone, origem, destino, data_partida, data_retorno, somente_ida, quantidade_pessoas
     } = await req.json();
@@ -153,7 +160,11 @@ Não se preocupe! Vou verificar manualmente com meus fornecedores e te retorno e
 
   } catch (error) {
     console.error('Erro na função request-flight-quote:', error);
-    return new Response(JSON.stringify({ success: false, message: error.message }), {
+    const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro desconhecido na função.';
+    if (error instanceof Error && error.stack) {
+      console.error(error.stack);
+    }
+    return new Response(JSON.stringify({ success: false, message: errorMessage }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
     });
