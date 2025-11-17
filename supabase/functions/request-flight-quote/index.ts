@@ -20,6 +20,7 @@ serve(async (req) => {
 
   try {
     // 1. Check for secrets and initialize clients
+    console.log("Iniciando função de cotação...");
     const serpApiKey = Deno.env.get('SERPAPI_API_KEY');
     const wootsapToken = Deno.env.get('WOOTSAP_API_TOKEN');
     const wootsapInstanceId = Deno.env.get('WOOTSAP_INSTANCE_ID');
@@ -41,8 +42,10 @@ serve(async (req) => {
     const {
       nome, telefone, origem, destino, data_partida, data_retorno, somente_ida, quantidade_pessoas
     } = await req.json();
+    console.log("Dados da solicitação recebidos:", { nome, telefone, origem, destino });
 
     // 2. Search for flights using SerpApi
+    console.log("Buscando voos na SerpApi...");
     const params = new URLSearchParams({
       engine: 'google_flights',
       departure_id: origem,
@@ -63,13 +66,16 @@ serve(async (req) => {
 
     const serpApiUrl = `https://serpapi.com/search?${params.toString()}`;
     const serpApiResponse = await fetch(serpApiUrl);
+    console.log(`Resposta da SerpApi: Status ${serpApiResponse.status}`);
 
     if (!serpApiResponse.ok) {
-      throw new Error(`A busca de voos falhou com status: ${serpApiResponse.status}`);
+      const errorText = await serpApiResponse.text();
+      throw new Error(`A busca de voos falhou: ${serpApiResponse.status} - ${errorText}`);
     }
 
     const flightData = await serpApiResponse.json();
     const allFlights = (flightData.best_flights || []).concat(flightData.other_flights || []);
+    console.log(`Encontrados ${allFlights.length} voos.`);
     
     let cheapestFlight = null;
     if (allFlights.length > 0) {
@@ -122,12 +128,18 @@ Não se preocupe! Vou verificar manualmente com meus fornecedores e te retorno e
 
     const wootsapUrl = `https://api.wootsap.com/api/v1/send-text?token=${wootsapToken}&instance_id=${wootsapInstanceId}&jid=${jid}&msg=${encodedMsg}`;
     
+    console.log("Enviando mensagem via Wootsap...");
     const wootsapResponse = await fetch(wootsapUrl, { method: 'GET' });
-    if (!wootsapResponse.ok) {
-      console.error("Wootsap API Error:", await wootsapResponse.text());
+    const wootsapResult = await wootsapResponse.json();
+
+    if (!wootsapResponse.ok || !wootsapResult.success) {
+      console.error("Erro na API Wootsap:", wootsapResult);
+      throw new Error(`Falha ao enviar mensagem via WhatsApp: ${wootsapResult.message || 'Erro desconhecido'}`);
     }
+    console.log("Mensagem enviada com sucesso via Wootsap.");
 
     // 4. Save the quote request to the database
+    console.log("Salvando cotação no banco de dados...");
     const { error: dbError } = await supabaseAdmin.from('bookings').insert({
       destination_id: `${origem}-${destino}`,
       destination_name: `Cotação: ${origem} para ${destino}`,
@@ -145,6 +157,7 @@ Não se preocupe! Vou verificar manualmente com meus fornecedores e te retorno e
     if (dbError) {
       throw new Error(`Falha ao salvar no banco de dados: ${dbError.message}`);
     }
+    console.log("Cotação salva com sucesso.");
 
     // 5. Return success response
     return new Response(JSON.stringify({ success: true, message: "Quote request processed successfully." }), {
@@ -153,7 +166,7 @@ Não se preocupe! Vou verificar manualmente com meus fornecedores e te retorno e
     });
 
   } catch (error) {
-    console.error('Error in request-flight-quote function:', error);
+    console.error('Erro na função request-flight-quote:', error);
     return new Response(JSON.stringify({ success: false, message: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
