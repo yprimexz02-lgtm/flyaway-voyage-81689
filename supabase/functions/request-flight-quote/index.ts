@@ -85,6 +85,8 @@ serve(async (req) => {
     }
 
     let whatsappMessage = "";
+    let purchaseLink = "";
+
     const formatDate = (dateStr: string) => {
         const [year, month, day] = dateStr.split('-');
         return `${day}/${month}/${year}`;
@@ -102,9 +104,9 @@ serve(async (req) => {
       const valorOriginalFormatado = formatCurrency(valorOriginal);
       const valorComDescontoFormatado = formatCurrency(valorComDesconto);
 
-      const purchaseMessage = `Olá! Recebi a cotação e gostaria de finalizar a compra da passagem de ${origem} para ${destino} para ${quantidade_pessoas} pessoa(s).`;
-      const encodedPurchaseMessage = encodeURIComponent(purchaseMessage);
-      const purchaseLink = `https://wa.me/${agentWhatsAppNumber}?text=${encodedPurchaseMessage}`;
+      const purchaseMessageText = `Olá! Recebi a cotação e gostaria de finalizar a compra da passagem de ${origem} para ${destino} para ${quantidade_pessoas} pessoa(s).`;
+      const encodedPurchaseMessage = encodeURIComponent(purchaseMessageText);
+      purchaseLink = `https://wa.me/${agentWhatsAppNumber}?text=${encodedPurchaseMessage}`;
 
       whatsappMessage = `Olá, ${nome}! Aqui é o GFC IA da GFC Travel Experience.
 
@@ -114,10 +116,7 @@ Seguem as melhores opções que selecionei para você:
 🌍 Destino: ${destinoCompleto}
 📅 Datas: ${dataIdaFormatada} → ${data_retorno ? dataVoltaFormatada : 'Somente Ida'}
 ✈️ Valor na Companhia Aérea: ${valorOriginalFormatado}
-✨ *Nossa tarifa exclusiva GFC: ${valorComDescontoFormatado}*
-
-*Para finalizar a compra, clique aqui:*
-${purchaseLink}`;
+✨ *Nossa tarifa exclusiva GFC: ${valorComDescontoFormatado}*`;
 
     } else {
       const destinoCompleto = `${origem} para ${destino}`;
@@ -128,28 +127,42 @@ Busquei por voos de ${destinoCompleto}, mas não encontrei opções online para 
 Não se preocupe! Vou verificar manualmente com meus fornecedores e te retorno em breve com as melhores alternativas.`;
     }
 
-    // Limpa o número de telefone e prepara para a API
     const cleanedPhone = telefone.replace(/\D/g, '');
     let phoneNumber = '55' + cleanedPhone;
 
-    // Remove o nono dígito se for um celular brasileiro
     if (phoneNumber.startsWith('55') && phoneNumber.length === 13 && phoneNumber.charAt(4) === '9') {
-      console.log(`Número ${phoneNumber} identificado como celular brasileiro. Removendo o nono dígito.`);
-      const countryCode = phoneNumber.substring(0, 2);
-      const ddd = phoneNumber.substring(2, 4);
-      const numberPart = phoneNumber.substring(5);
-      phoneNumber = countryCode + ddd + numberPart;
-      console.log(`Número transformado para: ${phoneNumber}`);
+      phoneNumber = phoneNumber.substring(0, 4) + phoneNumber.substring(5);
     }
 
     const jid = `${phoneNumber}@s.whatsapp.net`;
-    const encodedMsg = encodeURIComponent(whatsappMessage);
-    const wootsapUrl = `https://api.wootsap.com/api/v1/send-text?token=${wootsapToken}&instance_id=${wootsapInstanceId}&jid=${jid}&msg=${encodedMsg}`;
-    
-    console.log("Enviando mensagem via Wootsap para o JID:", jid);
-    const wootsapResponse = await fetch(wootsapUrl, { method: 'GET' });
-    const wootsapResult = await wootsapResponse.json();
 
+    let wootsapResponse;
+    if (cheapestFlight && purchaseLink) {
+      // Envia mensagem com botão
+      const wootsapUrl = `https://api.wootsap.com/api/v1/send-button-link`;
+      const body = {
+        token: wootsapToken,
+        instance_id: wootsapInstanceId,
+        jid: jid,
+        text: whatsappMessage,
+        button_display_text: "Comprar Agora",
+        button_url: purchaseLink,
+      };
+      console.log("Enviando mensagem com botão via Wootsap...");
+      wootsapResponse = await fetch(wootsapUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+    } else {
+      // Envia mensagem de texto simples
+      const encodedMsg = encodeURIComponent(whatsappMessage);
+      const wootsapUrl = `https://api.wootsap.com/api/v1/send-text?token=${wootsapToken}&instance_id=${wootsapInstanceId}&jid=${jid}&msg=${encodedMsg}`;
+      console.log("Enviando mensagem de texto simples via Wootsap...");
+      wootsapResponse = await fetch(wootsapUrl, { method: 'GET' });
+    }
+
+    const wootsapResult = await wootsapResponse.json();
     console.log("Status da resposta da Wootsap:", wootsapResponse.status);
     console.log("Corpo da resposta da Wootsap:", JSON.stringify(wootsapResult, null, 2));
 
@@ -162,7 +175,7 @@ Não se preocupe! Vou verificar manualmente com meus fornecedores e te retorno e
     console.log("Salvando cotação na tabela 'quote_requests'...");
     const { error: dbError } = await supabaseAdmin.from('quote_requests').insert({
       nome: nome,
-      telefone: telefone, // Salva o número original formatado no banco
+      telefone: telefone,
       origem: origem,
       destino: destino,
       data_partida: data_partida,
