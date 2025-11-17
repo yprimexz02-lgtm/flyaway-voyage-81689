@@ -65,7 +65,6 @@ serve(async (req) => {
     const flightData = await serpApiResponse.json();
     const allFlights = (flightData.best_flights || []).concat(flightData.other_flights || []);
     
-    // Find the cheapest flight
     let cheapestFlight = null;
     if (allFlights.length > 0) {
       cheapestFlight = allFlights.reduce((min, flight) => flight.price < min.price ? flight : min, allFlights[0]);
@@ -73,11 +72,42 @@ serve(async (req) => {
 
     // 3. Format and send WhatsApp message
     let whatsappMessage = "";
+    const formatDate = (dateStr: string) => {
+        const [year, month, day] = dateStr.split('T')[0].split('-');
+        return `${day}/${month}/${year}`;
+    };
+
     if (cheapestFlight) {
-      const price = formatCurrency(cheapestFlight.price);
-      whatsappMessage = `Olá, ${nome}! Encontrei uma ótima opção de voo de ${origem} para ${destino} por ${price}. O que acha? Posso te ajudar a finalizar a reserva.`;
+      const destinoCompleto = `${origem} para ${destino}`;
+      const dataIdaFormatada = formatDate(data_partida);
+      const dataVoltaFormatada = data_retorno ? formatDate(data_retorno) : 'N/A';
+      const periodo = data_retorno ? `${dataIdaFormatada} a ${dataVoltaFormatada}` : `a partir de ${dataIdaFormatada}`;
+      
+      const valorOriginal = cheapestFlight.price;
+      const valorComDesconto = valorOriginal * 0.94; // Applying 6% discount
+
+      const valorOriginalFormatado = formatCurrency(valorOriginal);
+      const valorComDescontoFormatado = formatCurrency(valorComDesconto);
+
+      whatsappMessage = `Olá! Aqui é o GFC IA da GFC Travel Experience.
+
+Sua cotação para ${destinoCompleto}, no período de ${periodo}, já está pronta!
+Seguem as melhores opções que selecionei para você:
+
+🌍 Destino: ${destinoCompleto}
+📅 Datas: ${dataIdaFormatada} → ${data_retorno ? dataVoltaFormatada : 'Somente Ida'}
+✈️ Valor na Companhia Aérea: ${valorOriginalFormatado}
+✨ *Nossa tarifa exclusiva GFC: ${valorComDescontoFormatado}*
+
+O que acha? Posso te ajudar a finalizar a reserva.`;
+
     } else {
-      whatsappMessage = `Olá, ${nome}! Busquei por voos de ${origem} para ${destino}, mas não encontrei opções online para essa data. Vou verificar manualmente com meus fornecedores e te retorno em breve.`;
+      const destinoCompleto = `${origem} para ${destino}`;
+      whatsappMessage = `Olá, ${nome}! Aqui é o GFC IA da GFC Travel Experience.
+
+Busquei por voos de ${destinoCompleto}, mas não encontrei opções online para essa data. 
+
+Não se preocupe! Vou verificar manualmente com meus fornecedores e te retorno em breve com as melhores alternativas.`;
     }
 
     const cleanPhoneNumber = telefone.replace(/\D/g, '');
@@ -91,7 +121,6 @@ serve(async (req) => {
 
     if (!wootsapResponse.ok || !wootsapResult.success) {
       console.error("Wootsap API Error:", wootsapResult);
-      // Don't throw an error here, just log it. The quote should still be saved.
     }
 
     // 4. Save the quote request to the database
@@ -99,11 +128,11 @@ serve(async (req) => {
       destination_id: `${origem}-${destino}`,
       destination_name: `Cotação: ${origem} para ${destino}`,
       full_name: nome,
-      cpf: '000.000.000-00', // Placeholder as it's not in the form
-      email: `${cleanPhoneNumber}@placeholder.user`, // Placeholder
+      cpf: '000.000.000-00',
+      email: `${cleanPhoneNumber}@placeholder.user`,
       phone: telefone,
       adults: quantidade_pessoas,
-      children: 0, // Not in the form
+      children: 0,
       departure_date: data_partida,
       return_date: somente_ida ? null : data_retorno,
       total_price: cheapestFlight ? cheapestFlight.price : 0,
