@@ -39,9 +39,9 @@ serve(async (req) => {
     });
 
     const {
-      telefone, origem, destino, data_partida, data_retorno, somente_ida, quantidade_pessoas
+      nome, telefone, origem, destino, data_partida, data_retorno, somente_ida, quantidade_pessoas
     } = await req.json();
-    console.log("Dados da solicitação recebidos:", { telefone, origem, destino, data_partida });
+    console.log("Dados da solicitação recebidos:", { nome, telefone, origem, destino, data_partida });
 
     console.log("Buscando voos na SerpApi...");
     const params = new URLSearchParams({
@@ -98,7 +98,7 @@ serve(async (req) => {
       const valorOriginalFormatado = formatCurrency(valorOriginal);
       const valorComDescontoFormatado = formatCurrency(valorComDesconto);
 
-      whatsappMessage = `Olá! Aqui é o GFC IA da GFC Travel Experience.
+      whatsappMessage = `Olá, ${nome}! Aqui é o GFC IA da GFC Travel Experience.
 
 Sua cotação para ${destinoCompleto}, no período de ${periodo}, já está pronta!
 Seguem as melhores opções que selecionei para você:
@@ -112,7 +112,7 @@ O que acha? Posso te ajudar a finalizar a reserva.`;
 
     } else {
       const destinoCompleto = `${origem} para ${destino}`;
-      whatsappMessage = `Olá! Aqui é o GFC IA da GFC Travel Experience.
+      whatsappMessage = `Olá, ${nome}! Aqui é o GFC IA da GFC Travel Experience.
 
 Busquei por voos de ${destinoCompleto}, mas não encontrei opções online para essa data. 
 
@@ -121,12 +121,24 @@ Não se preocupe! Vou verificar manualmente com meus fornecedores e te retorno e
 
     const jid = `${telefone}@s.whatsapp.net`;
     const encodedMsg = encodeURIComponent(whatsappMessage);
-
     const wootsapUrl = `https://api.wootsap.com/api/v1/send-text?token=${wootsapToken}&instance_id=${wootsapInstanceId}&jid=${jid}&msg=${encodedMsg}`;
     
+    // --- LOGS DE DIAGNÓSTICO ---
+    console.log("--- INÍCIO DO DIAGNÓSTICO WOOTSAP ---");
+    console.log("Telefone recebido do formulário:", telefone);
+    console.log("JID construído para a API:", jid);
+    console.log("URL da Wootsap (sem token):", `https://api.wootsap.com/api/v1/send-text?instance_id=${wootsapInstanceId}&jid=${jid}&msg=...`);
+    // -------------------------
+
     console.log("Enviando mensagem via Wootsap...");
     const wootsapResponse = await fetch(wootsapUrl, { method: 'GET' });
     const wootsapResult = await wootsapResponse.json();
+
+    // --- LOGS DE DIAGNÓSTICO ---
+    console.log("Status da resposta da Wootsap:", wootsapResponse.status);
+    console.log("Corpo da resposta da Wootsap:", JSON.stringify(wootsapResult, null, 2));
+    console.log("--- FIM DO DIAGNÓSTICO WOOTSAP ---");
+    // -------------------------
 
     if (!wootsapResponse.ok || !wootsapResult.success) {
       console.error("Erro na API Wootsap:", wootsapResult);
@@ -136,6 +148,7 @@ Não se preocupe! Vou verificar manualmente com meus fornecedores e te retorno e
 
     console.log("Salvando cotação na tabela 'quote_requests'...");
     const { error: dbError } = await supabaseAdmin.from('quote_requests').insert({
+      nome: nome,
       telefone: telefone,
       origem: origem,
       destino: destino,
