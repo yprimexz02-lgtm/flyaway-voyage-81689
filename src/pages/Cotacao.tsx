@@ -152,10 +152,23 @@ const Cotacao = () => {
       setDestinationSearch("");
     } catch (error) {
       console.error("Erro ao processar cotação:", error);
-      const errorMessage = error instanceof Error ? error.message : "Ocorreu um erro desconhecido.";
+      
+      let userFriendlyMessage = "Ocorreu um erro desconhecido. Por favor, tente novamente mais tarde.";
+      let errorTitle = "Erro ao Enviar Solicitação";
+
+      if (error instanceof Error) {
+        if (error.message.includes("This number is not found on WhatsApp")) {
+          errorTitle = "WhatsApp não encontrado";
+          userFriendlyMessage = "O número de telefone informado não foi encontrado no WhatsApp. Por favor, verifique e tente novamente.";
+          form.setError("telefone", { type: "manual", message: "Este número não foi encontrado no WhatsApp." });
+        } else {
+          userFriendlyMessage = `Detalhe: ${error.message}`;
+        }
+      }
+      
       toast({
-        title: "Erro ao Enviar Solicitação",
-        description: `Detalhe: ${errorMessage}`,
+        title: errorTitle,
+        description: userFriendlyMessage,
         variant: "destructive",
       });
     } finally {
