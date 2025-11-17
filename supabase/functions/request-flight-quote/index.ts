@@ -128,7 +128,11 @@ Busquei por voos de ${destinoCompleto}, mas não encontrei opções online para 
 Não se preocupe! Vou verificar manualmente com meus fornecedores e te retorno em breve com as melhores alternativas.`;
     }
 
-    const cleanedPhone = telefone.replace(/\D/g, '');
+    let cleanedPhone = telefone.replace(/\D/g, '');
+    // Re-adicionando a lógica para remover o 9º dígito de celulares brasileiros
+    if (cleanedPhone.length === 11) {
+      cleanedPhone = cleanedPhone.substring(0, 2) + cleanedPhone.substring(3);
+    }
     const phoneNumber = '55' + cleanedPhone;
     const jid = `${phoneNumber}@c.us`;
 
