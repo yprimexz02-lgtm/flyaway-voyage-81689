@@ -119,13 +119,16 @@ Busquei por voos de ${destinoCompleto}, mas não encontrei opções online para 
 Não se preocupe! Vou verificar manualmente com meus fornecedores e te retorno em breve com as melhores alternativas.`;
     }
 
-    let phoneNumber = telefone;
-    // Verifica se é um número de celular brasileiro (55 + DDD + 9 + 8 dígitos = 13 dígitos)
+    // Limpa o número de telefone e prepara para a API
+    const cleanedPhone = telefone.replace(/\D/g, '');
+    let phoneNumber = '55' + cleanedPhone;
+
+    // Remove o nono dígito se for um celular brasileiro
     if (phoneNumber.startsWith('55') && phoneNumber.length === 13 && phoneNumber.charAt(4) === '9') {
       console.log(`Número ${phoneNumber} identificado como celular brasileiro. Removendo o nono dígito.`);
-      const countryCode = phoneNumber.substring(0, 2); // "55"
-      const ddd = phoneNumber.substring(2, 4);       // "31"
-      const numberPart = phoneNumber.substring(5);   // "86858447"
+      const countryCode = phoneNumber.substring(0, 2);
+      const ddd = phoneNumber.substring(2, 4);
+      const numberPart = phoneNumber.substring(5);
       phoneNumber = countryCode + ddd + numberPart;
       console.log(`Número transformado para: ${phoneNumber}`);
     }
@@ -150,7 +153,7 @@ Não se preocupe! Vou verificar manualmente com meus fornecedores e te retorno e
     console.log("Salvando cotação na tabela 'quote_requests'...");
     const { error: dbError } = await supabaseAdmin.from('quote_requests').insert({
       nome: nome,
-      telefone: telefone,
+      telefone: telefone, // Salva o número original formatado no banco
       origem: origem,
       destino: destino,
       data_partida: data_partida,

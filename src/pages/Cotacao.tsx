@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
   nome: z.string().trim().min(2, { message: "Nome é muito curto" }),
-  telefone: z.string().trim().regex(/^55\d{10,11}$/, { message: "Número inválido. Use o formato 55DDD9XXXXXXXX" }),
+  telefone: z.string().trim().regex(/^\(\d{2}\) \d{5}-\d{4}$/, { message: "Número inválido. Use o formato (XX) XXXXX-XXXX" }),
   origem: z.string().trim().length(3, { message: "Selecione uma cidade da lista" }),
   destino: z.string().trim().length(3, { message: "Selecione uma cidade da lista" }),
   data_partida: z.date({ required_error: "Data de partida é obrigatória" }),
@@ -71,6 +71,14 @@ const Cotacao = () => {
       quantidade_pessoas: 1,
     },
   });
+
+  const formatPhone = (value: string) => {
+    const numbers = value.replace(/\D/g, "");
+    return numbers
+      .replace(/(\d{2})(\d)/, "($1) $2")
+      .replace(/(\d{5})(\d)/, "$1-$2")
+      .replace(/(-\d{4})\d+?$/, "$1");
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -183,7 +191,7 @@ const Cotacao = () => {
                 Solicite sua Cotação
               </CardTitle>
               <CardDescription className="text-lg">
-                Preencha o formulário e receba as melhores opções no seu WhatsApp.
+                Preencha o formulário e receba uma cotação personalizada pela nossa IA, diretamente no seu WhatsApp.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -191,7 +199,7 @@ const Cotacao = () => {
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <FormField control={form.control} name="nome" render={({ field }) => (<FormItem><FormLabel>Nome *</FormLabel><FormControl><Input placeholder="Seu nome completo" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                    <FormField control={form.control} name="telefone" render={({ field }) => (<FormItem><FormLabel>WhatsApp *</FormLabel><FormControl><Input type="tel" placeholder="5531999999999" {...field} maxLength={13} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="telefone" render={({ field }) => (<FormItem><FormLabel>WhatsApp *</FormLabel><FormControl><Input type="tel" placeholder="(XX) XXXXX-XXXX" {...field} onChange={(e) => field.onChange(formatPhone(e.target.value))} maxLength={15} /></FormControl><FormMessage /></FormItem>)} />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <FormField control={form.control} name="origem" render={() => (<FormItem ref={originRef}><FormLabel>Cidade de Origem *</FormLabel><FormControl><div className="relative"><Input placeholder="Digite a cidade de origem" value={originSearch} onChange={e => { setOriginSearch(e.target.value); setShowOriginSuggestions(true); form.setValue('origem', ''); }} onFocus={() => setShowOriginSuggestions(true)} /><div className="absolute z-50 w-full mt-1 bg-popover border rounded-lg shadow-lg max-h-60 overflow-auto">{showOriginSuggestions && originSearch && filteredOriginCities.map(c => (<button key={c.code} type="button" onClick={() => selectOrigin(c)} className="w-full px-4 py-3 text-left hover:bg-accent transition-colors flex items-center gap-2"><Plane className="w-4 h-4 text-muted-foreground" /><span className="font-medium">{c.name}</span><span className="text-sm text-muted-foreground">({c.code})</span></button>))}</div></div></FormControl><FormMessage /></FormItem>)} />
