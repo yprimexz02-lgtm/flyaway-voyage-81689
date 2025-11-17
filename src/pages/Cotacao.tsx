@@ -104,41 +104,24 @@ const Cotacao = () => {
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     try {
-      const searchData = {
-        origin: data.origem,
-        destination: data.destino,
-        departureDate: format(data.data_partida, "yyyy-MM-dd"),
-        returnDate: data.somente_ida ? undefined : (data.data_retorno ? format(data.data_retorno, "yyyy-MM-dd") : undefined),
-        adults: data.quantidade_pessoas,
-        travelClass: "ECONOMY",
+      // Format dates to ISO string for the function
+      const payload = {
+        ...data,
+        data_partida: format(data.data_partida, "yyyy-MM-dd"),
+        data_retorno: data.somente_ida || !data.data_retorno ? undefined : format(data.data_retorno, "yyyy-MM-dd"),
       };
-      const { data: flightData, error: flightError } = await supabase.functions.invoke("search-flights-travelpayouts", { body: searchData });
-      if (flightError || flightData.error) throw new Error(flightError?.message || flightData.error);
-      
-      let cheapestPrice = 0;
-      if (flightData?.data && flightData.data.length > 0) {
-        const prices = flightData.data.map((f: { price: { total: string } }) => parseFloat(f.price.total));
-        cheapestPrice = Math.min(...prices) * 5.85;
-      }
-      
-      const { error: dbError } = await supabase.from('bookings').insert({
-        destination_id: `${data.origem}-${data.destino}`,
-        destination_name: `Cotação: ${data.origem} para ${data.destino}`,
-        full_name: data.nome,
-        cpf: '000.000.000-00',
-        email: `${data.telefone.replace(/\D/g, '')}@placeholder.user`,
-        phone: data.telefone,
-        adults: data.quantidade_pessoas,
-        children: 0,
-        departure_date: format(data.data_partida, "yyyy-MM-dd"),
-        return_date: data.somente_ida || !data.data_retorno ? null : format(data.data_retorno, "yyyy-MM-dd"),
-        total_price: cheapestPrice,
+
+      const { error } = await supabase.functions.invoke("request-flight-quote", {
+        body: payload,
       });
-      if (dbError) throw dbError;
+
+      if (error) {
+        throw new Error(error.message);
+      }
       
       toast({
         title: "Solicitação Enviada com Sucesso!",
-        description: "Recebemos seu pedido. Entraremos em contato em breve pelo WhatsApp com as melhores cotações.",
+        description: "Recebemos seu pedido. Você receberá uma mensagem no WhatsApp em instantes com sua cotação.",
       });
       form.reset();
       setOriginSearch("");
@@ -166,7 +149,7 @@ const Cotacao = () => {
                 Solicite sua Cotação
               </CardTitle>
               <CardDescription className="text-lg">
-                Preencha o formulário e entraremos em contato com as melhores opções.
+                Preencha o formulário e receba as melhores opções no seu WhatsApp.
               </CardDescription>
             </CardHeader>
             <CardContent>
