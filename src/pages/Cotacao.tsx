@@ -18,7 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
-  telefone: z.string().trim().min(14, { message: "Telefone inválido. Use: (00) 00000-0000" }).max(15),
+  telefone: z.string().trim().regex(/^55\d{10,11}$/, { message: "Número inválido. Use o formato 55DDD9XXXXXXXX" }),
   origem: z.string().trim().length(3, { message: "Selecione uma cidade da lista" }),
   destino: z.string().trim().length(3, { message: "Selecione uma cidade da lista" }),
   data_partida: z.date({ required_error: "Data de partida é obrigatória" }),
@@ -92,10 +92,6 @@ const Cotacao = () => {
     form.setValue('destino', city.code, { shouldValidate: true });
     setDestinationSearch(`${city.name} (${city.code})`);
     setShowDestinationSuggestions(false);
-  };
-
-  const formatPhone = (value: string) => {
-    return value.replace(/\D/g, '').replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2').replace(/(-\d{4})\d+?$/, '$1');
   };
 
   const onSubmit = async (data: FormData) => {
@@ -190,7 +186,7 @@ const Cotacao = () => {
             <CardContent>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  <FormField control={form.control} name="telefone" render={({ field }) => (<FormItem><FormLabel>WhatsApp *</FormLabel><FormControl><Input placeholder="(00) 00000-0000" {...field} onChange={e => field.onChange(formatPhone(e.target.value))} maxLength={15} /></FormControl><FormMessage /></FormItem>)} />
+                  <FormField control={form.control} name="telefone" render={({ field }) => (<FormItem><FormLabel>WhatsApp *</FormLabel><FormControl><Input type="tel" placeholder="5531999999999" {...field} maxLength={13} /></FormControl><FormMessage /></FormItem>)} />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <FormField control={form.control} name="origem" render={() => (<FormItem ref={originRef}><FormLabel>Cidade de Origem *</FormLabel><FormControl><div className="relative"><Input placeholder="Digite a cidade de origem" value={originSearch} onChange={e => { setOriginSearch(e.target.value); setShowOriginSuggestions(true); form.setValue('origem', ''); }} onFocus={() => setShowOriginSuggestions(true)} /><div className="absolute z-50 w-full mt-1 bg-popover border rounded-lg shadow-lg max-h-60 overflow-auto">{showOriginSuggestions && originSearch && filteredOriginCities.map(c => (<button key={c.code} type="button" onClick={() => selectOrigin(c)} className="w-full px-4 py-3 text-left hover:bg-accent transition-colors flex items-center gap-2"><Plane className="w-4 h-4 text-muted-foreground" /><span className="font-medium">{c.name}</span><span className="text-sm text-muted-foreground">({c.code})</span></button>))}</div></div></FormControl><FormMessage /></FormItem>)} />
                     <FormField control={form.control} name="destino" render={() => (<FormItem ref={destinationRef}><FormLabel>Cidade de Destino *</FormLabel><FormControl><div className="relative"><Input placeholder="Digite a cidade de destino" value={destinationSearch} onChange={e => { setDestinationSearch(e.target.value); setShowDestinationSuggestions(true); form.setValue('destino', ''); }} onFocus={() => setShowDestinationSuggestions(true)} /><div className="absolute z-50 w-full mt-1 bg-popover border rounded-lg shadow-lg max-h-60 overflow-auto">{showDestinationSuggestions && destinationSearch && filteredDestinationCities.map(c => (<button key={c.code} type="button" onClick={() => selectDestination(c)} className="w-full px-4 py-3 text-left hover:bg-accent transition-colors flex items-center gap-2"><Plane className="w-4 h-4 text-muted-foreground" /><span className="font-medium">{c.name}</span><span className="text-sm text-muted-foreground">({c.code})</span></button>))}</div></div></FormControl><FormMessage /></FormItem>)} />

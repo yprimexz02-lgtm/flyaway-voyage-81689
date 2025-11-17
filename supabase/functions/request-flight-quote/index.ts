@@ -26,8 +26,6 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-    console.log("Chave SerpApi lida:", serpApiKey ? `${serpApiKey.substring(0, 4)}...${serpApiKey.slice(-4)}` : "Não encontrada");
-
     if (!serpApiKey || !wootsapToken || !wootsapInstanceId || !supabaseUrl || !supabaseServiceRoleKey) {
       throw new Error(`Um ou mais segredos de ambiente não estão configurados.`);
     }
@@ -121,12 +119,7 @@ Busquei por voos de ${destinoCompleto}, mas não encontrei opções online para 
 Não se preocupe! Vou verificar manualmente com meus fornecedores e te retorno em breve com as melhores alternativas.`;
     }
 
-    let cleanPhoneNumber = telefone.replace(/\D/g, '');
-    if (cleanPhoneNumber.length === 10 || cleanPhoneNumber.length === 11) {
-      cleanPhoneNumber = '55' + cleanPhoneNumber;
-    }
-
-    const jid = `${cleanPhoneNumber}@s.whatsapp.net`;
+    const jid = `${telefone}@s.whatsapp.net`;
     const encodedMsg = encodeURIComponent(whatsappMessage);
 
     const wootsapUrl = `https://api.wootsap.com/api/v1/send-text?token=${wootsapToken}&instance_id=${wootsapInstanceId}&jid=${jid}&msg=${encodedMsg}`;
