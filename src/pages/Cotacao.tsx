@@ -104,18 +104,30 @@ const Cotacao = () => {
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     try {
+      // Explicitly construct the payload to ensure only pure, serializable data is sent.
       const payload = {
-        ...data,
+        nome: data.nome,
+        telefone: data.telefone,
+        origem: data.origem,
+        destino: data.destino,
         data_partida: format(data.data_partida, "yyyy-MM-dd"),
-        data_retorno: data.somente_ida || !data.data_retorno ? undefined : format(data.data_retorno, "yyyy-MM-dd"),
+        data_retorno: data.somente_ida || !data.data_retorno ? null : format(data.data_retorno, "yyyy-MM-dd"),
+        somente_ida: data.somente_ida,
+        quantidade_pessoas: data.quantidade_pessoas,
       };
 
-      const { error } = await supabase.functions.invoke("request-flight-quote", {
+      const { data: functionData, error } = await supabase.functions.invoke("request-flight-quote", {
         body: payload,
       });
 
+      // Handle network errors from the invoke call itself
       if (error) {
-        throw new Error(error.message);
+        throw error;
+      }
+
+      // Handle application-level errors returned from the function
+      if (functionData && !functionData.success) {
+        throw new Error(functionData.message || "A função de cotação retornou um erro.");
       }
       
       toast({
