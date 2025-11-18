@@ -131,11 +131,11 @@ Não se preocupe! Vou verificar manualmente com meus fornecedores e te retorno e
     const cleanedPhone = telefone.replace(/\D/g, '');
     let finalPhoneNumber = cleanedPhone;
 
-    // Adiciona o nono dígito se for um celular brasileiro e não o tiver
-    if (finalPhoneNumber.length === 10) {
+    // Se for um celular com 11 dígitos (DDD + 9 + NÚMERO), remove o nono dígito para a API.
+    if (finalPhoneNumber.length === 11) {
       const areaCode = finalPhoneNumber.substring(0, 2);
-      const numberPart = finalPhoneNumber.substring(2);
-      finalPhoneNumber = `${areaCode}9${numberPart}`;
+      const numberPart = finalPhoneNumber.substring(3); // Pula o '9'
+      finalPhoneNumber = `${areaCode}${numberPart}`;
     }
 
     const phoneNumberWithCountryCode = '55' + finalPhoneNumber;
