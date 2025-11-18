@@ -84,24 +84,12 @@ serve(async (req) => {
       cheapestFlight = allFlights.reduce((min, flight) => flight.price < min.price ? flight : min, allFlights[0]);
     }
 
+    let whatsappMessage = "";
+
     const formatDate = (dateStr: string) => {
         const [year, month, day] = dateStr.split('-');
         return `${day}/${month}/${year}`;
     };
-
-    const cleanedPhone = telefone.replace(/\D/g, '');
-    let finalPhoneNumber = cleanedPhone;
-
-    if (finalPhoneNumber.length === 11) {
-      const areaCode = finalPhoneNumber.substring(0, 2);
-      const numberPart = finalPhoneNumber.substring(3);
-      finalPhoneNumber = `${areaCode}${numberPart}`;
-    }
-
-    const phoneNumberWithCountryCode = '55' + finalPhoneNumber;
-    const jid = `${phoneNumberWithCountryCode}@s.whatsapp.net`;
-
-    let wootsapResponse;
 
     if (cheapestFlight) {
       const destinoCompleto = `${origem} para ${destino}`;
@@ -119,7 +107,7 @@ serve(async (req) => {
       const encodedPurchaseMessage = encodeURIComponent(purchaseMessageText);
       const purchaseLink = `https://wa.me/${agentWhatsAppNumber}?text=${encodedPurchaseMessage}`;
 
-      const whatsappMessage = `Olá, ${nome}! Aqui é o GFC IA da GFC Travel Experience.
+      whatsappMessage = `Olá, ${nome}! Aqui é o GFC IA da GFC Travel Experience.
 
 Sua cotação para ${destinoCompleto}, no período de ${periodo}, já está pronta!
 Seguem as melhores opções que selecionei para você:
@@ -129,39 +117,35 @@ Seguem as melhores opções que selecionei para você:
 ✈️ Valor na Companhia Aérea: ${valorOriginalFormatado}
 ✨ *Nossa tarifa exclusiva GFC: ${valorComDescontoFormatado}*
 
-Clique no botão abaixo para adquirir sua passagem e garantir esse preço incrível!`;
-
-      const wootsapUrl = `https://api.wootsap.com/api/v1/send-button-url`;
-      const wootsapPayload = {
-        token: wootsapToken,
-        instance_id: wootsapInstanceId,
-        jid: jid,
-        msg: whatsappMessage,
-        btn_text: "ADQUIRIR PASSAGEM",
-        btn_url: purchaseLink
-      };
-      
-      console.log("Enviando mensagem com botão via Wootsap para JID:", jid);
-      wootsapResponse = await fetch(wootsapUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(wootsapPayload)
-      });
+Para comprar, clique aqui: ${purchaseLink}`;
 
     } else {
       const destinoCompleto = `${origem} para ${destino}`;
-      const whatsappMessage = `Olá, ${nome}! Aqui é o GFC IA da GFC Travel Experience.
+      whatsappMessage = `Olá, ${nome}! Aqui é o GFC IA da GFC Travel Experience.
 
 Busquei por voos de ${destinoCompleto}, mas não encontrei opções online para essa data. 
 
 Não se preocupe! Vou verificar manualmente com meus fornecedores e te retorno em breve com as melhores alternativas.`;
-      
-      const encodedMsg = encodeURIComponent(whatsappMessage);
-      const wootsapUrl = `https://api.wootsap.com/api/v1/send-text?token=${wootsapToken}&instance_id=${wootsapInstanceId}&jid=${jid}&msg=${encodedMsg}`;
-      
-      console.log("Enviando mensagem de texto via Wootsap para JID:", jid);
-      wootsapResponse = await fetch(wootsapUrl, { method: 'GET' });
     }
+
+    const cleanedPhone = telefone.replace(/\D/g, '');
+    let finalPhoneNumber = cleanedPhone;
+
+    // Se for um celular com 11 dígitos (DDD + 9 + NÚMERO), remove o nono dígito para a API.
+    if (finalPhoneNumber.length === 11) {
+      const areaCode = finalPhoneNumber.substring(0, 2);
+      const numberPart = finalPhoneNumber.substring(3); // Pula o '9'
+      finalPhoneNumber = `${areaCode}${numberPart}`;
+    }
+
+    const phoneNumberWithCountryCode = '55' + finalPhoneNumber;
+    const jid = `${phoneNumberWithCountryCode}@s.whatsapp.net`;
+
+    const encodedMsg = encodeURIComponent(whatsappMessage);
+    const wootsapUrl = `https://api.wootsap.com/api/v1/send-text?token=${wootsapToken}&instance_id=${wootsapInstanceId}&jid=${jid}&msg=${encodedMsg}`;
+    
+    console.log("Enviando mensagem via Wootsap para JID:", jid);
+    const wootsapResponse = await fetch(wootsapUrl, { method: 'GET' });
 
     if (!wootsapResponse.ok) {
       const errorBody = await wootsapResponse.text();
