@@ -129,8 +129,17 @@ Não se preocupe! Vou verificar manualmente com meus fornecedores e te retorno e
     }
 
     const cleanedPhone = telefone.replace(/\D/g, '');
-    const phoneNumber = '55' + cleanedPhone;
-    const jid = `${phoneNumber}@s.whatsapp.net`; // Corrigido para o formato correto
+    let finalPhoneNumber = cleanedPhone;
+
+    // Adiciona o nono dígito se for um celular brasileiro e não o tiver
+    if (finalPhoneNumber.length === 10) {
+      const areaCode = finalPhoneNumber.substring(0, 2);
+      const numberPart = finalPhoneNumber.substring(2);
+      finalPhoneNumber = `${areaCode}9${numberPart}`;
+    }
+
+    const phoneNumberWithCountryCode = '55' + finalPhoneNumber;
+    const jid = `${phoneNumberWithCountryCode}@s.whatsapp.net`;
 
     const encodedMsg = encodeURIComponent(whatsappMessage);
     const wootsapUrl = `https://api.wootsap.com/api/v1/send-text?token=${wootsapToken}&instance_id=${wootsapInstanceId}&jid=${jid}&msg=${encodedMsg}`;
