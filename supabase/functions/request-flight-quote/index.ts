@@ -128,26 +128,27 @@ Busquei por voos de ${destinoCompleto}, mas não encontrei opções online para 
 Não se preocupe! Vou verificar manualmente com meus fornecedores e te retorno em breve com as melhores alternativas.`;
     }
 
-    let cleanedPhone = telefone.replace(/\D/g, '');
-    // Re-adicionando a lógica para remover o 9º dígito de celulares brasileiros
-    if (cleanedPhone.length === 11) {
-      cleanedPhone = cleanedPhone.substring(0, 2) + cleanedPhone.substring(3);
-    }
+    const cleanedPhone = telefone.replace(/\D/g, '');
     const phoneNumber = '55' + cleanedPhone;
-    const jid = `${phoneNumber}@c.us`;
+    const jid = `${phoneNumber}@s.whatsapp.net`; // Corrigido para o formato correto
 
     const encodedMsg = encodeURIComponent(whatsappMessage);
     const wootsapUrl = `https://api.wootsap.com/api/v1/send-text?token=${wootsapToken}&instance_id=${wootsapInstanceId}&jid=${jid}&msg=${encodedMsg}`;
     
-    console.log("Enviando mensagem de texto simples via Wootsap...");
+    console.log("Enviando mensagem via Wootsap para JID:", jid);
     const wootsapResponse = await fetch(wootsapUrl, { method: 'GET' });
 
-    const wootsapResult = await wootsapResponse.json();
-    console.log("Status da resposta da Wootsap:", wootsapResponse.status);
-    console.log("Corpo da resposta da Wootsap:", JSON.stringify(wootsapResult, null, 2));
+    if (!wootsapResponse.ok) {
+      const errorBody = await wootsapResponse.text();
+      console.error("Erro na API Wootsap:", errorBody);
+      throw new Error(`Erro de comunicação com o serviço de mensagens. Status: ${wootsapResponse.status}`);
+    }
 
-    if (!wootsapResponse.ok || !wootsapResult.success) {
-      console.error("Erro na API Wootsap:", wootsapResult);
+    const wootsapResult = await wootsapResponse.json();
+    console.log("Resposta da Wootsap:", JSON.stringify(wootsapResult, null, 2));
+
+    if (!wootsapResult.success) {
+      console.error("Erro retornado pela Wootsap:", wootsapResult);
       throw new Error(`Falha ao enviar mensagem via WhatsApp: ${wootsapResult.message || 'Erro desconhecido'}`);
     }
     console.log("Mensagem enviada com sucesso via Wootsap.");
