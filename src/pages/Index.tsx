@@ -70,7 +70,7 @@ const Index = () => {
       <Navigation />
 
       {/* Hero Section */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden z-10">
+      <section className="relative h-[80vh] sm:h-screen flex items-center justify-center overflow-hidden z-10">
         <div 
           className="absolute inset-0 bg-cover bg-top"
           style={{ backgroundImage: `url(${heroImage})` }}
@@ -119,7 +119,7 @@ const Index = () => {
                 <img 
                   src={discoverCristo} 
                   alt="Cristo Redentor no Rio de Janeiro" 
-                  className="w-full h-[400px] object-cover rounded-3xl shadow-premium border border-primary/30"
+                  className="w-full h-[300px] lg:h-[400px] object-cover rounded-3xl shadow-premium border border-primary/30"
                 />
               </div>
               <div className="order-1 lg:order-2 space-y-6">
@@ -182,7 +182,7 @@ const Index = () => {
               <Link 
                 key={index}
                 to={`/reserva/${dest.id}`}
-                className={`group relative h-96 rounded-3xl overflow-hidden cursor-pointer hover-lift transition-all duration-700 block ${
+                className={`group relative h-80 md:h-96 rounded-3xl overflow-hidden cursor-pointer hover-lift transition-all duration-700 block ${
                   destinationsSection.isVisible 
                     ? "opacity-100 translate-y-0" 
                     : "opacity-0 translate-y-10"

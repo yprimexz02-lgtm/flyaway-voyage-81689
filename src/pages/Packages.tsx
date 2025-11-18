@@ -199,7 +199,7 @@ const Packages = () => {
                   transitionDelay: packagesSection.isVisible ? `${index * 100}ms` : "0ms" 
                 }}
               >
-                <div className="relative h-64 overflow-hidden">
+                <div className="relative h-56 sm:h-64 overflow-hidden">
                   <img
                     src={pkg.image}
                     alt={pkg.name}
